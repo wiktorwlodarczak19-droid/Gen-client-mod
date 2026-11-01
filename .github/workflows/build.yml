@@ -17,9 +17,20 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build mod
         run: gradle build
+      - name: Verify mod JAR
+        shell: bash
+        run: |
+          echo "=== Built files ==="
+          ls -lah build/libs
+          JAR="$(find build/libs -maxdepth 1 -type f -name 'gen-client-*.jar' ! -name '*-sources.jar' | head -n 1)"
+          test -n "$JAR"
+          echo "=== Selected JAR: $JAR ==="
+          jar tf "$JAR" | head -n 40
+          echo "=== Fabric metadata ==="
+          unzip -p "$JAR" fabric.mod.json
       - uses: actions/upload-artifact@v4
         with:
           name: GEN-CLIENT-1.21.1
-          path: build/libs/*[!sources].jar
+          path: build/libs/gen-client-*.jar
           if-no-files-found: error
           retention-days: 14
