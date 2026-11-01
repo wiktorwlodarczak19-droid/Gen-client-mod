@@ -12,6 +12,7 @@ public final class GenClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        ModBadgeHud.register();
         openVisualsKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.genclient.open_visuals", InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT, "category.genclient"
