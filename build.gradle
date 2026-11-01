@@ -50,3 +50,12 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
+
+// Explicitly include compiled classes and processed Fabric metadata in the distributable JAR.
+jar {
+    from(sourceSets.main.output)
+}
+
+sourcesJar {
+    from(sourceSets.main.allSource)
+}
