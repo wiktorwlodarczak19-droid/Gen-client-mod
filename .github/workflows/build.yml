@@ -18,20 +18,25 @@ jobs:
           java-version: "21"
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Inspect source files
+      - name: Inspect and verify source layout
         run: |
-          echo "=== Java sources ==="
+          echo "=== Java sources in checkout ==="
           find src/main/java -type f -name '*.java' -print
-          echo "=== Resources ==="
+          echo "=== Resources in checkout ==="
           find src/main/resources -type f -print
+          gradle --no-daemon verifySourceLayout
 
       - name: Build mod
         run: gradle --no-daemon clean build
 
-      - name: Verify mod JAR
+      - name: Verify compiled output and mod JAR
         shell: bash
         run: |
           set -euo pipefail
+          echo "=== Compiled classes ==="
+          find build/classes -type f -print || true
+          echo "=== Processed resources ==="
+          find build/resources -type f -print || true
           echo "=== Built files ==="
           ls -lah build/libs
           JAR="$(find build/libs -maxdepth 1 -type f -name 'gen-client-*.jar' ! -name '*-sources.jar' | head -n 1)"
