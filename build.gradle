@@ -6,6 +6,14 @@ version = project.mod_version
 group = project.maven_group
 base { archivesName = project.archives_base_name }
 
+// Explicit Fabric/Gradle source roots; keep classes and resources in the remapped mod JAR.
+sourceSets {
+    main {
+        java.srcDirs = [file('src/main/java')]
+        resources.srcDirs = [file('src/main/resources')]
+    }
+}
+
 repositories {
     mavenCentral()
 }
