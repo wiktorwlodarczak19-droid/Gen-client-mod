@@ -6,24 +6,41 @@ version = project.mod_version
 group = project.maven_group
 base { archivesName = project.archives_base_name }
 
-// Explicit Fabric/Gradle source roots; keep classes and resources in the remapped mod JAR.
-sourceSets {
-    main {
-        java.srcDirs = [file('src/main/java')]
-        resources.srcDirs = [file('src/main/resources')]
-    }
-}
-
 repositories {
+    maven { url = "https://maven.fabricmc.net/" }
     mavenCentral()
 }
-
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+// Register source roots additively (rather than replacing Gradle's source directory set).
+sourceSets {
+    main {
+        java.srcDir("src/main/java")
+        resources.srcDir("src/main/resources")
+    }
+}
+
+tasks.register("verifySourceLayout") {
+    doLast {
+        def javaFiles = sourceSets.main.allJava.files
+        def resourceFiles = sourceSets.main.resources.files
+        println "MAIN JAVA ROOTS: ${sourceSets.main.java.srcDirs}"
+        println "MAIN JAVA FILES: ${javaFiles}"
+        println "MAIN RESOURCE ROOTS: ${sourceSets.main.resources.srcDirs}"
+        println "MAIN RESOURCE FILES: ${resourceFiles}"
+        if (!javaFiles.any { it.name == "GenClient.java" }) {
+            throw new GradleException("GenClient.java is not part of sourceSets.main")
+        }
+        if (!resourceFiles.any { it.name == "fabric.mod.json" }) {
+            throw new GradleException("fabric.mod.json is not part of sourceSets.main")
+        }
+    }
 }
 
 processResources {
