@@ -15,8 +15,14 @@ jobs:
           distribution: temurin
           java-version: "21"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Inspect source files
+        run: |
+          echo "=== Java sources ==="
+          find src/main/java -type f -name '*.java' -print
+          echo "=== Resources ==="
+          find src/main/resources -type f -print
       - name: Build mod
-        run: gradle build
+        run: gradle clean build
       - name: Verify mod JAR
         shell: bash
         run: |
@@ -25,7 +31,16 @@ jobs:
           JAR="$(find build/libs -maxdepth 1 -type f -name 'gen-client-*.jar' ! -name '*-sources.jar' | head -n 1)"
           test -n "$JAR"
           echo "=== Selected JAR: $JAR ==="
-          jar tf "$JAR" | head -n 40
+          jar tf "$JAR" | tee /tmp/gen-client-jar-contents.txt
+          grep -q 'pl/genclient/GenClient.class' /tmp/gen-client-jar-contents.txt
+          grep -q 'pl/genclient/VisualsScreen.class' /tmp/gen-client-jar-contents.txt
+          grep -q '^fabric.mod.json      - uses: actions/upload-artifact@v4
+        with:
+          name: GEN-CLIENT-1.21.1
+          path: build/libs/gen-client-*.jar
+          if-no-files-found: error
+          retention-days: 14
+ /tmp/gen-client-jar-contents.txt
           echo "=== Fabric metadata ==="
           unzip -p "$JAR" fabric.mod.json
       - uses: actions/upload-artifact@v4
