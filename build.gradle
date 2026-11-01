@@ -18,13 +18,6 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
-// Register source roots additively (rather than replacing Gradle's source directory set).
-sourceSets {
-    main {
-        java.srcDir("src/main/java")
-        resources.srcDir("src/main/resources")
-    }
-}
 
 tasks.register("verifySourceLayout") {
     doLast {
