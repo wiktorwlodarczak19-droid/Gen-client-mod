@@ -27,6 +27,7 @@ public final class GenClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             VisualEffects.tick(client);
             while (openVisualsKey.wasPressed()) {
+                if (client.player == null) continue;
                 if (client.currentScreen == null) {
                     client.setScreen(new VisualsScreen(null));
                 } else if (client.currentScreen instanceof GenScreen genScreen) {
