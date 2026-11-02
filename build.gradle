@@ -53,9 +53,13 @@ java {
 
 // Explicitly include compiled classes and processed Fabric metadata in the distributable JAR.
 jar {
-    from(sourceSets.main.output)
+    // Loom/Gradle source-set output was empty at archive time in CI; package the
+    // actual task output directories explicitly so the distributable is complete.
+    from(layout.buildDirectory.dir("classes/java/main"))
+    from(layout.buildDirectory.dir("resources/main"))
 }
 
 sourcesJar {
-    from(sourceSets.main.allSource)
+    from(fileTree("src/main/java"))
+    from(fileTree("src/main/resources"))
 }
