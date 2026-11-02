@@ -62,11 +62,11 @@ public final class StyleScreen extends GenScreen {
         drawPanel(context, panelX, panelY, panelWidth, 360);
         drawSectionTitle(context, "STYLE & PERSONALIZATION", "Sakura Dark / Pearl / Ice / Lavender / Mint.",
                 panelX + 34, panelY + 26);
-        context.drawText(textRenderer, "ACCENT COLOR", panelX + 34, panelY + 88, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "WALLPAPER", panelX + 34, panelY + 127, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "ATMOSPHERE", panelX + 34, panelY + 166, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "HUD", panelX + 34, panelY + 205, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "INTEGRATION", panelX + 34, panelY + 244, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "ACCENT COLOR", panelX + 34, panelY + 77, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "WALLPAPER", panelX + 34, panelY + 116, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "ATMOSPHERE", panelX + 34, panelY + 155, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "HUD", panelX + 34, panelY + 194, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "INTEGRATION", panelX + 34, panelY + 233, 0xFF8F98A8, false);
         context.drawText(textRenderer, "Settings are stored in config/genclient.json", panelX + 34,
                 panelY + 340, 0xFF858D9B, false);
     }
