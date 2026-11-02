@@ -1,7 +1,5 @@
 name: Build GEN CLIENT
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -17,63 +15,62 @@ jobs:
           distribution: temurin
           java-version: "21"
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
 
       - name: Inspect and verify source layout
+        shell: bash
         run: |
+          set -euo pipefail
           echo "=== Java sources in checkout ==="
           find src/main/java -type f -name '*.java' -print
           echo "=== Resources in checkout ==="
           find src/main/resources -type f -print
-          gradle --no-daemon verifySourceLayout
+          test -f src/main/java/pl/genclient/GenClient.java
+          test -f src/main/java/pl/genclient/VisualsScreen.java
+          test -f src/main/java/pl/genclient/ModBadgeHud.java
+          test -f src/main/resources/fabric.mod.json
 
-      - name: Build mod
-        run: gradle --no-daemon clean build
+      - name: Build mod with Fabric Loom
+        run: gradle --no-daemon --no-build-cache clean build
 
-      - name: Verify remapped Fabric JAR
+      - name: Verify the remapped Fabric JAR
         shell: bash
         run: |
           set -euo pipefail
+          JAR="build/libs/gen-client-0.1.0.jar"
 
-          echo "=== Compiled classes ==="
-          find build/classes -type f -print
-          echo "=== Processed resources ==="
-          find build/resources -type f -print
+          echo "=== Build output archives ==="
+          find build -type f -name '*.jar' -printf '%p (%s bytes)\n' | sort
+          echo "=== Expected distributable ==="
+          test -s "$JAR"
+          SIZE="$(stat -c '%s' "$JAR")"
+          echo "JAR size: $SIZE bytes"
+          test "$SIZE" -gt 1000
 
-          echo "=== All Loom archives ==="
-          find build/libs -maxdepth 1 -type f -name '*.jar' -printf '%f (%s bytes)\n' | sort
-
-          # Loom's remapJar output is the distributable Fabric mod.
-          # The -dev.jar is the intermediary development archive and must not
-          # be selected for installation in a Minecraft instance.
-          mapfile -t MOD_JARS < <(find build/libs -maxdepth 1 -type f \
-            -name 'gen-client-*.jar' \
-            ! -name '*-sources.jar' \
-            ! -name '*-dev.jar' | sort)
-
-          if [ "${#MOD_JARS[@]}" -ne 1 ]; then
-            echo "Expected exactly one remapped mod JAR; found ${#MOD_JARS[@]}."
-            printf '%s\n' "${MOD_JARS[@]}"
-            exit 1
-          fi
-
-          JAR="${MOD_JARS[0]}"
-          echo "=== Selected remapped JAR: $JAR ==="
           jar tf "$JAR" | tee /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/GenClient.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/VisualsScreen.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/ModBadgeHud.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'fabric.mod.json' /tmp/gen-client-jar-contents.txt
 
-          grep -q '^pl/genclient/GenClient.class$' /tmp/gen-client-jar-contents.txt
-          grep -q '^pl/genclient/VisualsScreen.class$' /tmp/gen-client-jar-contents.txt
-          grep -q '^pl/genclient/ModBadgeHud.class$' /tmp/gen-client-jar-contents.txt
-          grep -q '^fabric.mod.json$' /tmp/gen-client-jar-contents.txt
+          unzip -p "$JAR" fabric.mod.json > /tmp/gen-client-fabric-mod.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
 
-          echo "=== Fabric metadata inside distributable ==="
-          unzip -p "$JAR" fabric.mod.json | tee /tmp/gen-client-fabric-mod.json
-          grep -q '"id": "genclient"' /tmp/gen-client-fabric-mod.json
-          grep -q '"environment": "client"' /tmp/gen-client-fabric-mod.json
+          metadata = json.loads(Path("/tmp/gen-client-fabric-mod.json").read_text())
+          assert metadata["id"] == "genclient", metadata
+          assert metadata["environment"] == "client", metadata
+          assert metadata["entrypoints"]["client"] == ["pl.genclient.GenClient"], metadata
+          assert metadata["version"] == "0.1.0", metadata
+          print(json.dumps(metadata, indent=2))
+          PY
 
           mkdir -p build/distribution
           cp "$JAR" build/distribution/GEN-CLIENT-1.21.1.jar
           test -s build/distribution/GEN-CLIENT-1.21.1.jar
-          echo "=== Final installable JAR ==="
+          echo "Verified final installable JAR:"
           ls -lh build/distribution/GEN-CLIENT-1.21.1.jar
           jar tf build/distribution/GEN-CLIENT-1.21.1.jar >/dev/null
 
