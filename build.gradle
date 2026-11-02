@@ -18,7 +18,6 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
-
 tasks.register("verifySourceLayout") {
     doLast {
         def javaFiles = sourceSets.main.allJava.files
@@ -51,11 +50,41 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
-// Explicitly include compiled classes and processed Fabric metadata in the distributable JAR.
-jar {
-    // Loom/Gradle source-set output was empty at archive time in CI; package the
-    // actual task output directories explicitly so the distributable is complete.
+// Build a deterministic named/intermediate archive outside Loom's default
+// dev-jar task. The remapJar task below consumes this exact file.
+def genClientNamedJar = tasks.register("genClientNamedJar", Jar) {
+    group = "build"
+    description = "Packages compiled GEN CLIENT classes and processed resources before remapping."
+    dependsOn(tasks.named("classes"))
+    archiveClassifier.set("named")
+    destinationDirectory.set(layout.buildDirectory.dir("intermediates"))
     from(layout.buildDirectory.dir("classes/java/main"))
     from(layout.buildDirectory.dir("resources/main"))
+
+    doLast {
+        def archive = archiveFile.get().asFile
+        if (!archive.isFile() || archive.length() < 1000) {
+            throw new GradleException("GEN CLIENT intermediate JAR is missing or unexpectedly small: ${archive}")
+        }
+        def entries = zipTree(archive)
+        ["pl/genclient/GenClient.class",
+         "pl/genclient/VisualsScreen.class",
+         "pl/genclient/ModBadgeHud.class",
+         "fabric.mod.json"].each { entry ->
+            if (entries.matching { include entry }.files.isEmpty()) {
+                throw new GradleException("GEN CLIENT intermediate JAR is missing ${entry}")
+            }
+        }
+        println "Verified GEN CLIENT intermediate JAR: ${archive} (${archive.length()} bytes)"
+    }
 }
 
+// Loom's remapJar is the installable artifact. Set its input after Loom has
+// finished configuring its defaults so the exact, verified archive above is
+// what gets remapped to intermediary names.
+afterEvaluate {
+    tasks.named("remapJar") {
+        dependsOn(genClientNamedJar)
+        inputFile.set(genClientNamedJar.flatMap { it.archiveFile })
+    }
+}
