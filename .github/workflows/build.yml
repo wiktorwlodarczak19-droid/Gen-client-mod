@@ -29,30 +29,57 @@ jobs:
       - name: Build mod
         run: gradle --no-daemon clean build
 
-      - name: Verify compiled output and mod JAR
+      - name: Verify remapped Fabric JAR
         shell: bash
         run: |
           set -euo pipefail
+
           echo "=== Compiled classes ==="
-          find build/classes -type f -print || true
+          find build/classes -type f -print
           echo "=== Processed resources ==="
-          find build/resources -type f -print || true
-          echo "=== Built files ==="
-          ls -lah build/libs
-          JAR="$(find build/libs -maxdepth 1 -type f -name 'gen-client-*.jar' ! -name '*-sources.jar' | head -n 1)"
-          test -n "$JAR"
-          echo "=== Selected JAR: $JAR ==="
+          find build/resources -type f -print
+
+          echo "=== All Loom archives ==="
+          find build/libs -maxdepth 1 -type f -name '*.jar' -printf '%f (%s bytes)\n' | sort
+
+          # Loom's remapJar output is the distributable Fabric mod.
+          # The -dev.jar is the intermediary development archive and must not
+          # be selected for installation in a Minecraft instance.
+          mapfile -t MOD_JARS < <(find build/libs -maxdepth 1 -type f \
+            -name 'gen-client-*.jar' \
+            ! -name '*-sources.jar' \
+            ! -name '*-dev.jar' | sort)
+
+          if [ "${#MOD_JARS[@]}" -ne 1 ]; then
+            echo "Expected exactly one remapped mod JAR; found ${#MOD_JARS[@]}."
+            printf '%s\n' "${MOD_JARS[@]}"
+            exit 1
+          fi
+
+          JAR="${MOD_JARS[0]}"
+          echo "=== Selected remapped JAR: $JAR ==="
           jar tf "$JAR" | tee /tmp/gen-client-jar-contents.txt
+
           grep -q '^pl/genclient/GenClient.class$' /tmp/gen-client-jar-contents.txt
           grep -q '^pl/genclient/VisualsScreen.class$' /tmp/gen-client-jar-contents.txt
           grep -q '^pl/genclient/ModBadgeHud.class$' /tmp/gen-client-jar-contents.txt
           grep -q '^fabric.mod.json$' /tmp/gen-client-jar-contents.txt
-          echo "=== Fabric metadata ==="
-          unzip -p "$JAR" fabric.mod.json
+
+          echo "=== Fabric metadata inside distributable ==="
+          unzip -p "$JAR" fabric.mod.json | tee /tmp/gen-client-fabric-mod.json
+          grep -q '"id": "genclient"' /tmp/gen-client-fabric-mod.json
+          grep -q '"environment": "client"' /tmp/gen-client-fabric-mod.json
+
+          mkdir -p build/distribution
+          cp "$JAR" build/distribution/GEN-CLIENT-1.21.1.jar
+          test -s build/distribution/GEN-CLIENT-1.21.1.jar
+          echo "=== Final installable JAR ==="
+          ls -lh build/distribution/GEN-CLIENT-1.21.1.jar
+          jar tf build/distribution/GEN-CLIENT-1.21.1.jar >/dev/null
 
       - uses: actions/upload-artifact@v4
         with:
           name: GEN-CLIENT-1.21.1
-          path: build/libs/gen-client-*.jar
+          path: build/distribution/GEN-CLIENT-1.21.1.jar
           if-no-files-found: error
           retention-days: 14
