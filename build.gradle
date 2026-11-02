@@ -59,7 +59,3 @@ jar {
     from(layout.buildDirectory.dir("resources/main"))
 }
 
-sourcesJar {
-    from(fileTree("src/main/java"))
-    from(fileTree("src/main/resources"))
-}
