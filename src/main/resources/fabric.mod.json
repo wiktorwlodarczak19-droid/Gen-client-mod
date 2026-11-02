@@ -3,11 +3,21 @@
   "id": "genclient",
   "version": "${version}",
   "name": "GEN CLIENT",
-  "description": "Custom client-side visuals and interface for Minecraft 1.21.1.",
+  "description": "Sakura Dark client interface, dynamic island and cosmetic visuals for Minecraft 1.21.1.",
   "authors": ["GEN CLIENT Team"],
-  "contact": {"sources": "https://github.com/wiktorwlodarczak19-droid/Gen-client-mod"},
+  "contact": {
+    "sources": "https://github.com/wiktorwlodarczak19-droid/Gen-client-mod"
+  },
   "license": "MIT",
   "environment": "client",
-  "entrypoints": {"client": ["pl.genclient.GenClient"]},
-  "depends": {"fabricloader": ">=0.16.0", "minecraft": "~1.21.1", "java": ">=21", "fabric-api": "*"}
+  "entrypoints": {
+    "client": ["pl.genclient.client.GenClient"]
+  },
+  "mixins": ["genclient.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
 }
