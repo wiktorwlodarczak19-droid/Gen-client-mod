@@ -36,7 +36,7 @@ public abstract class GenScreen extends Screen {
         }
 
         Identifier wallpaper = wallpaperTexture();
-        context.drawTexture(wallpaper, 0, 0, width, height, 0.0f, 0.0f, 1600, 900, 1600, 900);
+        context.drawTexture(wallpaper, 0, 0, width, height, 0.0f, 0.0f, 1280, 720, 1280, 720);
         context.fillGradient(0, 0, width, height, 0x40060910, 0x9B07090E);
         context.fill(0, 0, width, 1, 0x22FFFFFF);
     }
@@ -80,6 +80,10 @@ public abstract class GenScreen extends Screen {
 
     protected void roundedFill(DrawContext context, int x, int y, int w, int h, int radius, int color) {
         UiDraw.roundedFill(context, x, y, w, h, radius, color);
+    }
+
+    protected void roundedPanel(DrawContext context, int x, int y, int w, int h, int radius, int fill, int border) {
+        UiDraw.roundedPanel(context, x, y, w, h, radius, fill, border);
     }
 
     protected void drawSectionTitle(DrawContext context, String title, String subtitle, int x, int y) {
