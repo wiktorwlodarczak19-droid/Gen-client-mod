@@ -1,34 +1,43 @@
-# GEN CLIENT
+# GEN CLIENT 0.2.0
 
-Client-side mod do Minecraft Java **1.21.1** na **Fabric**.
+Client-side mod do **Minecraft Java 1.21.1 + Fabric**. Interfejs i grafiki bazują na przesłanym launcherze GEN CLIENT: Sakura Dark, szkło bez dodatkowego rozmycia, różowy akcent i tapety.
 
 ## Wymagania
+- Minecraft Java 1.21.1
 - Java 21
-- Gradle 8.10.2
-- Minecraft 1.21.1
 - Fabric Loader 0.16.10 lub nowszy zgodny z 1.21.1
-- Fabric API (wersja dla Minecraft 1.21.1)
+- Fabric API dla Minecraft 1.21.1
+
+## Instalacja
+1. Zainstaluj Fabric dla Minecraft 1.21.1 i dodaj Fabric API.
+2. Skopiuj `gen-client-0.2.0.jar` do folderu `mods`.
+3. Uruchom profil Fabric.
+
+## Sterowanie
+- **Right Shift** — otwiera / zamyka Visuals w trakcie gry.
+- **Esc** — wraca z paneli do poprzedniego ekranu; własne menu pauzy ma przycisk powrotu do gry.
+
+## Co zawiera wersja 0.2.0
+- Własne menu startowe GEN CLIENT i własne menu pauzy.
+- Własny panel Visuals z ostrym tekstem i przyciskami w stylu Sakura Dark. Ekrany nie wywołują blur pipeline Minecrafta.
+- Dynamic Island na HUD: zegar, FPS i adres serwera / tryb singleplayer.
+- Style: trzy tapety, pięć akcentów kolorystycznych (Sakura, Pearl, Ice, Lavender, Mint), płatki sakury, Dynamic Island i odznaki wykrytych modów Flashback / Mod Menu.
+- Zapisywanie ustawień w `config/genclient.json`.
+- Działające efekty kosmetyczne: Jump Circle, Glass Vapor, Target ESP marker, Hit Sparks, Aura Glint i Armor Glass Light.
 
 ## Budowanie
-Projekt korzysta ze standardowego przepływu Fabric Loom:
-1. `compileJava` i `processResources` przygotowują klasy oraz metadane moda.
-2. `jar` tworzy archiwum developerskie.
-3. `remapJar` tworzy końcowy JAR z nazwami klas wymaganymi przez Fabric.
+Projekt używa standardowego przepływu Fabric Loom. Nie ma własnych zadań podmieniających wejście `remapJar`.
 
-Uruchom:
+W katalogu projektu:
+
 ```bash
 gradle --no-daemon clean build
 ```
 
-Końcowy, instalowalny plik powinien znajdować się w:
-`build/libs/gen-client-0.1.0.jar`
+Gotowy mod: `build/libs/gen-client-0.2.0.jar`.
 
-Nie używaj archiwum `*-dev.jar` ani `*-sources.jar` jako moda do instalacji.
-
-## Sterowanie
-- **Prawy Shift** — otwiera panel GEN CLIENT.
-
-## Aktualny zakres
-Repozytorium zawiera fundament moda: entrypoint Fabric, skrót klawiszowy, bazowy panel Visuals oraz pasek oznaczeń wykrytych modów Flashback / Mod Menu.
-
-Przełączniki w panelu są obecnie szkieletem interfejsu — nie uruchamiają jeszcze docelowych efektów renderowania. Jump Circle, Glass Vapor, efekty 3D, docelowe menu liquid-glass i pozostałe planowane funkcje wymagają dalszej implementacji.
+## Zakres i uczciwe ograniczenia
+- Target ESP w tej wersji jest dyskretnym markerem celu pod celownikiem, a nie podświetlaniem bytów przez ściany.
+- Hit Sparks uruchamiają kosmetyczne cząsteczki przy próbie uderzenia w byt; nie ingerują w obrażenia ani zasięg.
+- Armor Glass Light i Aura Glint używają cząsteczek, nie zmieniają modeli ani właściwości ekwipunku.
+- Mod nie zawiera aimbota, kill-aury, auto-clickera, X-raya, exploitów ani obchodzenia zabezpieczeń serwerów.
