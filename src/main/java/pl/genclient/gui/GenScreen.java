@@ -35,18 +35,31 @@ public abstract class GenScreen extends Screen {
             return;
         }
 
-        Identifier wallpaper = wallpaperTexture();
-        context.drawTexture(wallpaper, 0, 0, width, height, 0.0f, 0.0f, 480, 270, 480, 270);
-        context.fillGradient(0, 0, width, height, 0x40060910, 0x9B07090E);
+        if (ClientConfig.wallpaper.equals("petal_mist")) {
+            drawPetalMist(context);
+        } else {
+            Identifier wallpaper = wallpaperTexture();
+            context.drawTexture(wallpaper, 0, 0, width, height, 0.0f, 0.0f, 480, 270, 480, 270);
+            context.fillGradient(0, 0, width, height, 0x40060910, 0x9B07090E);
+        }
         context.fill(0, 0, width, 1, 0x22FFFFFF);
     }
 
     private Identifier wallpaperTexture() {
         return switch (ClientConfig.wallpaper) {
             case "midnight_ink" -> Identifier.of("genclient", "textures/gui/wallpapers/midnight_ink.jpg");
-            case "petal_mist" -> Identifier.of("genclient", "textures/gui/wallpapers/petal_mist.jpg");
             default -> Identifier.of("genclient", "textures/gui/wallpapers/sakura_dark.jpg");
         };
+    }
+
+    private void drawPetalMist(DrawContext context) {
+        context.fill(0, 0, width, height, 0xFF090B12);
+        context.fillGradient(0, 0, width, height, 0xFF18131E, 0xFF080B13);
+        int rose = (ClientConfig.accentColor() & 0x00FFFFFF) | 0x26000000;
+        int glowX = width * 3 / 4;
+        int glowY = height / 5;
+        roundedFill(context, glowX - 76, glowY - 28, 152, 76, 38, rose);
+        roundedFill(context, width / 7, height * 3 / 4, 116, 34, 17, 0x183C3657);
     }
 
     private void drawHeader(DrawContext context) {
