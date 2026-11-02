@@ -21,7 +21,7 @@ Client-side mod do **Minecraft Java 1.21.1 + Fabric**. Interfejs i grafiki bazuj
 - Własne menu startowe GEN CLIENT i własne menu pauzy.
 - Własny panel Visuals z ostrym tekstem i przyciskami w stylu Sakura Dark. Ekrany nie wywołują blur pipeline Minecrafta.
 - Dynamic Island na HUD: zegar, FPS i adres serwera / tryb singleplayer.
-- Style: trzy tapety, pięć akcentów kolorystycznych (Sakura, Pearl, Ice, Lavender, Mint), płatki sakury, Dynamic Island i odznaki wykrytych modów Flashback / Mod Menu.
+- Style: tapety Sakura Dark i Midnight Ink oraz proceduralny Petal Mist, pięć akcentów kolorystycznych (Sakura, Pearl, Ice, Lavender, Mint), płatki sakury, Dynamic Island i odznaki wykrytych modów Flashback / Mod Menu.
 - Zapisywanie ustawień w `config/genclient.json`.
 - Działające efekty kosmetyczne: Jump Circle, Glass Vapor, Target ESP marker, Hit Sparks, Aura Glint i Armor Glass Light.
 
