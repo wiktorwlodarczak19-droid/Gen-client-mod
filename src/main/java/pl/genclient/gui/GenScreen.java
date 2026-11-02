@@ -36,7 +36,7 @@ public abstract class GenScreen extends Screen {
         }
 
         Identifier wallpaper = wallpaperTexture();
-        context.drawTexture(wallpaper, 0, 0, width, height, 0.0f, 0.0f, 1280, 720, 1280, 720);
+        context.drawTexture(wallpaper, 0, 0, width, height, 0.0f, 0.0f, 480, 270, 480, 270);
         context.fillGradient(0, 0, width, height, 0x40060910, 0x9B07090E);
         context.fill(0, 0, width, 1, 0x22FFFFFF);
     }
