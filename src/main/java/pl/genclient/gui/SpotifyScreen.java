@@ -37,7 +37,7 @@ public final class SpotifyScreen extends GenScreen {
         clientIdField.setPlaceholder(Text.literal("Wklej Client ID aplikacji Spotify"));
         addDrawableChild(clientIdField);
 
-        int actionY = fieldY + 36;
+        int actionY = fieldY + 42;
         int third = (contentWidth - 16) / 3;
         addDrawableChild(new GenButton(contentX, actionY, third, 25,
                 Text.literal("SAVE CLIENT ID"), () -> SpotifyService.setClientId(clientIdField.getText())));
@@ -75,7 +75,7 @@ public final class SpotifyScreen extends GenScreen {
                 "Dashboard → Create app → Settings → Client ID",
                 panelX + 30, panelY + 137, 0xFF858D9B, false);
 
-        int detailsY = panelY + 217;
+        int detailsY = panelY + 216;
         context.drawText(textRenderer, "REDIRECT URI", panelX + 30, detailsY, 0xFFF4BFD3, false);
         context.drawText(textRenderer, "http://127.0.0.1",
                 panelX + 30, detailsY + 13, 0xFFE5E7ED, false);
