@@ -74,6 +74,7 @@ jobs:
             pl/genclient/gui/VisualsScreen.class \
             fabric.mod.json \
             genclient.mixins.json \
+            genclient.refmap.json \
             assets/genclient/textures/gui/logo_mark.png \
             assets/genclient/textures/gui/logo_text.png \
             assets/genclient/textures/gui/wallpapers/sakura_dark.jpg \
