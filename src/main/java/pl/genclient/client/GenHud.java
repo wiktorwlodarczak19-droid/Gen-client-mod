@@ -36,7 +36,7 @@ public final class GenHud {
 
     private static void drawIsland(DrawContext context, MinecraftClient client) {
         int screenWidth = client.getWindow().getScaledWidth();
-        int islandWidth = 316;
+        int islandWidth = 380;
         int x = screenWidth / 2 - islandWidth / 2;
         int y = 7;
         int accent = ClientConfig.accentColor();
@@ -55,20 +55,29 @@ public final class GenHud {
         context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("LOCAL TIME"), x + 158, y + 21, 0xFF858D9B);
 
         String fps = client.getCurrentFps() + " FPS";
-        context.drawTextWithShadow(client.textRenderer, Text.literal(fps), x + 226, y + 8, 0xFFE8EAF0);
+        context.drawTextWithShadow(client.textRenderer, Text.literal(fps), x + 220, y + 8, 0xFFE8EAF0);
         var serverEntry = client.getCurrentServerEntry();
         String lowerLabel = serverEntry == null ? "SINGLEPLAYER" : serverEntry.address.toUpperCase();
         if (serverEntry != null && serverEntry.ping >= 0) lowerLabel += "  /  " + serverEntry.ping + " MS";
-        boolean truncated = client.textRenderer.getWidth(lowerLabel) > 86;
+        boolean truncated = client.textRenderer.getWidth(lowerLabel) > 95;
         if (truncated) {
-            while (!lowerLabel.isEmpty() && client.textRenderer.getWidth(lowerLabel + "...") > 86) {
+            while (!lowerLabel.isEmpty() && client.textRenderer.getWidth(lowerLabel + "...") > 95) {
                 lowerLabel = lowerLabel.substring(0, lowerLabel.length() - 1);
             }
             lowerLabel += "...";
         }
-        context.drawText(client.textRenderer, Text.literal(lowerLabel), x + 226, y + 21, 0xFF9BA2B0, false);
+        context.drawText(client.textRenderer, Text.literal(lowerLabel), x + 220, y + 21, 0xFF9BA2B0, false);
+
+        boolean musicPlaying = client.getMusicTracker().isPlayingType(client.getMusicType());
+        int musicColor = musicPlaying ? accent : 0xFF858D9B;
+        context.drawCenteredTextWithShadow(client.textRenderer,
+                Text.literal(musicPlaying ? "♪ ON" : "♪ OFF"), x + 347, y + 8, musicColor);
+        context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("MUSIC"),
+                x + 347, y + 21, 0xFF858D9B);
+
         context.fill(x + 116, y + 8, x + 117, y + 30, 0x2EFFFFFF);
         context.fill(x + 207, y + 8, x + 208, y + 30, 0x2EFFFFFF);
+        context.fill(x + 316, y + 8, x + 317, y + 30, 0x2EFFFFFF);
     }
 
     private static void drawTarget(DrawContext context, MinecraftClient client) {
