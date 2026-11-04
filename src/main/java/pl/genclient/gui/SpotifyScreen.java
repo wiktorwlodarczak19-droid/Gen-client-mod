@@ -87,9 +87,9 @@ public final class SpotifyScreen extends GenScreen {
         String nowPlaying = track.hasTrack()
                 ? track.title() + "  —  " + track.artists()
                 : SpotifyService.getStatus();
-        context.drawText(textRenderer, textRenderer.trimToWidth(nowPlaying, panelWidth - 60),
+        context.drawText(textRenderer, textRenderer.trimToWidth(nowPlaying, panelWidth - 170),
                 panelX + 30, panelY + panelHeight - 57, 0xFFE6E8EE, false);
-        context.drawText(textRenderer, textRenderer.trimToWidth(SpotifyService.getStatus(), panelWidth - 60),
+        context.drawText(textRenderer, textRenderer.trimToWidth(SpotifyService.getStatus(), panelWidth - 170),
                 panelX + 30, panelY + panelHeight - 25, 0xFF9BA2B1, false);
         if (track.hasTrack()) {
             context.drawText(textRenderer, track.progressLabel()
