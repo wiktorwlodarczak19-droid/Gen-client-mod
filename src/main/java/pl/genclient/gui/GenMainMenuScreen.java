@@ -78,10 +78,11 @@ public final class GenMainMenuScreen extends GenScreen {
             int buttonX = panelX + inset;
             int buttonWidth = panelWidth - inset * 2;
             addDrawableChild(new GenButton(buttonX, panelY + u(222), buttonWidth, u(42),
-                    Text.literal("SINGLEPLAYER"), () -> client.setScreen(new SelectWorldScreen(this)), true));
-            addDrawableChild(new GenButton(buttonX, panelY + u(270), buttonWidth, u(30),
+                    Text.literal("PLAY"), () -> client.setScreen(new SelectWorldScreen(this)), true));
+            addDrawableChild(new GenButton(buttonX, panelY + u(310), (buttonWidth - u(8)) / 2, u(26),
                     Text.literal("MULTIPLAYER"), () -> client.setScreen(new MultiplayerScreen(this))));
-            addDrawableChild(new GenButton(buttonX, panelY + u(307), buttonWidth, u(27),
+            addDrawableChild(new GenButton(buttonX + (buttonWidth + u(8)) / 2, panelY + u(310),
+                    (buttonWidth - u(8)) / 2, u(26),
                     Text.literal("OPTIONS"), () -> client.setScreen(new OptionsScreen(this, client.options))));
         } else if (page == Page.STYLE) {
             int inset = u(20);
@@ -217,8 +218,8 @@ public final class GenMainMenuScreen extends GenScreen {
         context.drawText(textRenderer, trim(username, right - x - u(18)),
                 x + u(9), panelY + u(172), 0xFFF2F2F3, false);
 
-        roundedFill(context, x, panelY + u(345), right - x, u(12), u(4), 0x553D3F42);
-        context.drawText(textRenderer, "READY", x, panelY + u(365), 0xFF9DA1A8, false);
+        roundedFill(context, x, panelY + u(271), right - x, u(14), u(4), 0x553D3F42);
+        context.drawText(textRenderer, "READY", x, panelY + u(293), 0xFF9DA1A8, false);
 
         int statsY = panelY + panelHeight - u(132);
         context.drawText(textRenderer, "Time played", x, statsY, 0xFFE4E5E8, false);
