@@ -16,6 +16,16 @@ public abstract class GenScreen extends Screen {
         this.parent = parent;
     }
 
+    /**
+     * Screen.render() invokes the vanilla background renderer before drawing widgets.
+     * Its default implementation applies the menu/game blur. GEN CLIENT paints its own
+     * backdrop in render(), so explicitly disable that second pass to keep the UI sharp.
+     */
+    @Override
+    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+        // Intentionally empty: never apply Minecraft's fullscreen background blur.
+    }
+
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         drawBackdrop(context);
