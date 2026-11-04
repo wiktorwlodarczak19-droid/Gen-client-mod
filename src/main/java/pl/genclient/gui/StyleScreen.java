@@ -60,10 +60,12 @@ public final class StyleScreen extends GenScreen {
         }));
 
         int footerY = panelY + panelHeight - 42;
-        addDrawableChild(new GenButton(panelX + 34, footerY, 122, 24,
-                Text.literal("EXPORT CONFIG"), () -> configMessage = ClientConfig.exportConfig()));
-        addDrawableChild(new GenButton(panelX + 166, footerY, 122, 24,
-                Text.literal("IMPORT FILE"), () -> {
+        addDrawableChild(new GenButton(panelX + 30, footerY, 98, 24,
+                Text.literal("SPOTIFY"), () -> client.setScreen(new SpotifyScreen(this)), true));
+        addDrawableChild(new GenButton(panelX + 136, footerY, 96, 24,
+                Text.literal("EXPORT"), () -> configMessage = ClientConfig.exportConfig()));
+        addDrawableChild(new GenButton(panelX + 240, footerY, 96, 24,
+                Text.literal("IMPORT"), () -> {
             configMessage = ClientConfig.importConfig();
             refreshMessages();
         }));
