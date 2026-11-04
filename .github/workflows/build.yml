@@ -38,6 +38,7 @@ jobs:
           test -f src/main/resources/assets/genclient/textures/gui/logo_text.png
           test -f src/main/resources/assets/genclient/textures/gui/wallpapers/sakura_dark.jpg
           test -f src/main/resources/assets/genclient/textures/gui/wallpapers/midnight_ink.jpg
+          test -f src/main/resources/assets/genclient/textures/gui/wallpapers/main_menu_mountains.jpg
           echo "All GEN CLIENT sources and resources are present."
 
       - name: Build with Fabric Loom
@@ -77,6 +78,7 @@ jobs:
             assets/genclient/textures/gui/logo_text.png \
             assets/genclient/textures/gui/wallpapers/sakura_dark.jpg \
             assets/genclient/textures/gui/wallpapers/midnight_ink.jpg \
+            assets/genclient/textures/gui/wallpapers/main_menu_mountains.jpg \
             assets/genclient/lang/pl_pl.json \
             assets/genclient/lang/en_us.json
           do
