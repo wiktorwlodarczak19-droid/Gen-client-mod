@@ -6,74 +6,74 @@ import net.minecraft.text.Text;
 import pl.genclient.config.ClientConfig;
 
 public final class StyleScreen extends GenScreen {
+    private int panelWidth;
+    private int panelHeight;
+    private int panelX;
+    private int panelY;
+    private int buttonX;
+    private int buttonWidth;
+    private int firstY;
+    private int rowGap;
+
     public StyleScreen(Screen parent) {
         super(Text.literal("GEN CLIENT STYLE"), parent);
     }
 
     @Override
     protected void init() {
-        int panelWidth = Math.min(560, width - 40);
-        int panelX = (width - panelWidth) / 2;
-        int panelY = Math.max(60, (height - 360) / 2);
-        int x = panelX + 34;
-        int y = panelY + 95;
-        int buttonWidth = panelWidth - 68;
+        panelWidth = Math.min(560, width - 40);
+        panelHeight = Math.min(360, height - 96);
+        panelHeight = Math.max(220, panelHeight);
+        panelX = (width - panelWidth) / 2;
+        panelY = Math.max(58, (height - panelHeight) / 2);
+        buttonX = panelX + 34;
+        buttonWidth = panelWidth - 68;
+        firstY = panelY + Math.max(88, panelHeight / 4);
+        rowGap = Math.max(30, Math.min(39, (panelHeight - 126) / 5));
 
-        addDrawableChild(new GenButton(x, y, buttonWidth, 26, accentLabel(), () -> {
+        addDrawableChild(new GenButton(buttonX, firstY, buttonWidth, 26, accentLabel(), () -> {
             ClientConfig.cycleAccent();
             refreshMessages();
         }));
-        addDrawableChild(new GenButton(x, y + 39, buttonWidth, 24, wallpaperLabel(), () -> {
-            String next = switch (ClientConfig.wallpaper) {
-                case "sakura_dark" -> "midnight_ink";
-                case "midnight_ink" -> "petal_mist";
-                default -> "sakura_dark";
-            };
-            ClientConfig.setWallpaper(next);
+        addDrawableChild(new GenButton(buttonX, firstY + rowGap, buttonWidth, 24, wallpaperLabel(), () -> {
+            ClientConfig.cycleWallpaper();
             refreshMessages();
         }));
-        addDrawableChild(new GenButton(x, y + 78, buttonWidth, 24,
+        addDrawableChild(new GenButton(buttonX, firstY + rowGap * 2, buttonWidth, 24,
                 toggleLabel("FALLING SAKURA", ClientConfig.sakuraPetals), () -> {
             ClientConfig.sakuraPetals = !ClientConfig.sakuraPetals;
             ClientConfig.save();
             refreshMessages();
         }));
-        addDrawableChild(new GenButton(x, y + 117, buttonWidth, 24,
+        addDrawableChild(new GenButton(buttonX, firstY + rowGap * 3, buttonWidth, 24,
                 toggleLabel("DYNAMIC ISLAND HUD", ClientConfig.dynamicIsland), () -> {
             ClientConfig.dynamicIsland = !ClientConfig.dynamicIsland;
             ClientConfig.save();
             refreshMessages();
         }));
-        addDrawableChild(new GenButton(x, y + 156, buttonWidth, 24,
+        addDrawableChild(new GenButton(buttonX, firstY + rowGap * 4, buttonWidth, 24,
                 toggleLabel("COMPANION MOD BADGES", ClientConfig.modBadges), () -> {
             ClientConfig.modBadges = !ClientConfig.modBadges;
             ClientConfig.save();
             refreshMessages();
         }));
-        addDrawableChild(new GenButton(panelX + panelWidth - 144, panelY + 308, 110, 24,
-                Text.literal("BACK"), this::close));
+        addDrawableChild(new GenButton(panelX + panelWidth - 144, panelY + panelHeight - 46,
+                110, 24, Text.literal("BACK"), this::close));
     }
 
     @Override
     protected void renderBody(DrawContext context, int mouseX, int mouseY, float delta) {
-        int panelWidth = Math.min(560, width - 40);
-        int panelX = (width - panelWidth) / 2;
-        int panelY = Math.max(60, (height - 360) / 2);
-        drawPanel(context, panelX, panelY, panelWidth, 360);
-        drawSectionTitle(context, "STYLE & PERSONALIZATION", "Sakura Dark / Pearl / Ice / Lavender / Mint.",
+        drawPanel(context, panelX, panelY, panelWidth, panelHeight);
+        drawSectionTitle(context, "STYLE & PERSONALIZATION",
+                "Sakura Dark / Pearl / Ice / Lavender / Mint.",
                 panelX + 34, panelY + 26);
-        context.drawText(textRenderer, "ACCENT COLOR", panelX + 34, panelY + 77, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "WALLPAPER", panelX + 34, panelY + 116, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "ATMOSPHERE", panelX + 34, panelY + 155, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "HUD", panelX + 34, panelY + 194, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "INTEGRATION", panelX + 34, panelY + 233, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "Settings are stored in config/genclient.json", panelX + 34,
-                panelY + 340, 0xFF858D9B, false);
-    }
-
-    @Override
-    public boolean shouldPause() {
-        return client != null && client.world != null;
+        context.drawText(textRenderer, "ACCENT COLOR", panelX + 34, firstY - 14, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "WALLPAPER", panelX + 34, firstY + rowGap - 14, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "ATMOSPHERE", panelX + 34, firstY + rowGap * 2 - 14, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "HUD", panelX + 34, firstY + rowGap * 3 - 14, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "INTEGRATION", panelX + 34, firstY + rowGap * 4 - 14, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "Settings are stored in config/genclient.json",
+                panelX + 34, panelY + panelHeight - 14, 0xFF858D9B, false);
     }
 
     private void refreshMessages() {
@@ -94,7 +94,9 @@ public final class StyleScreen extends GenScreen {
     }
 
     private static Text accentLabel() { return Text.literal("ACCENT  /  " + ClientConfig.accent); }
-    private static Text wallpaperLabel() { return Text.literal("WALLPAPER  /  " + ClientConfig.wallpaper.replace('_', ' ').toUpperCase()); }
+    private static Text wallpaperLabel() {
+        return Text.literal("WALLPAPER  /  " + ClientConfig.wallpaper.replace('_', ' ').toUpperCase());
+    }
     private static Text toggleLabel(String title, boolean enabled) {
         return Text.literal((enabled ? "●  ON   /   " : "○  OFF  /   ") + title);
     }
