@@ -131,14 +131,18 @@ public final class GenMainMenuScreen extends GenScreen {
 
     @Override
     protected void drawBackdrop(DrawContext context) {
-        context.fillGradient(0, 0, width, height, 0xFF050607, 0xFF131416);
+        int topColor = ClientConfig.wallpaper.equals("midnight_ink") ? 0xFF05070B
+                : ClientConfig.wallpaper.equals("petal_mist") ? 0xFF0D0A12 : 0xFF050607;
+        int bottomColor = ClientConfig.wallpaper.equals("midnight_ink") ? 0xFF111824
+                : ClientConfig.wallpaper.equals("petal_mist") ? 0xFF1A1420 : 0xFF131416;
+        context.fillGradient(0, 0, width, height, topColor, bottomColor);
         context.fillGradient(0, height / 3, width, height, 0x08000000, 0xAA050607);
         drawMountainRange(context, (int) (height * 0.78f), (int) (height * 0.20f),
-                0.19f, 0xFF343538, 0xFF111214, 0);
+                0.19f, 0xFF34383D, 0xFF111214, 0);
         drawMountainRange(context, (int) (height * 0.83f), (int) (height * 0.15f),
-                0.69f, 0xFF55565A, 0xFF17181B, 1);
+                0.69f, 0xFF55585E, 0xFF17181B, 1);
         drawMountainRange(context, (int) (height * 0.91f), (int) (height * 0.10f),
-                0.90f, 0xFF77787B, 0xFF222326, 2);
+                0.90f, 0xFF777A80, 0xFF222326, 2);
         context.fill(0, 0, width, 1, 0x24FFFFFF);
     }
 
@@ -213,8 +217,8 @@ public final class GenMainMenuScreen extends GenScreen {
         context.drawText(textRenderer, trim(username, right - x - u(18)),
                 x + u(9), panelY + u(172), 0xFFF2F2F3, false);
 
-        context.fill(x, panelY + u(310), right, panelY + u(311), 0x20FFFFFF);
-        context.drawText(textRenderer, "READY", x, panelY + u(321), 0xFF9DA1A8, false);
+        roundedFill(context, x, panelY + u(345), right - x, u(12), u(4), 0x553D3F42);
+        context.drawText(textRenderer, "READY", x, panelY + u(365), 0xFF9DA1A8, false);
 
         int statsY = panelY + panelHeight - u(132);
         context.drawText(textRenderer, "Time played", x, statsY, 0xFFE4E5E8, false);
@@ -298,8 +302,8 @@ public final class GenMainMenuScreen extends GenScreen {
         context.drawText(textRenderer, "Wallpaper: " + ClientConfig.wallpaper.replace('_', ' ').toUpperCase(),
                 x, panelY + u(161), 0xFFE2E3E6, false);
         context.drawText(textRenderer, "Atmosphere", x, panelY + u(209), 0xFF9DA1A8, false);
-        context.drawText(textRenderer, "HUD", x, panelY + u(305), 0xFF9DA1A8, false);
-        context.drawText(textRenderer, "Integration", x, panelY + u(353), 0xFF9DA1A8, false);
+        context.drawText(textRenderer, "HUD", x, panelY + u(257), 0xFF9DA1A8, false);
+        context.drawText(textRenderer, "Integration", x, panelY + u(305), 0xFF9DA1A8, false);
         context.drawText(textRenderer, "Saved to config/genclient.json", x,
                 panelY + panelHeight - u(25), 0xFF858A93, false);
     }
