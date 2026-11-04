@@ -24,7 +24,7 @@ public final class ClientConfig {
 
     public static String accent = "SAKURA";
     public static String wallpaper = "sakura_dark";
-    public static boolean sakuraPetals = true;
+    public static boolean sakuraPetals = false;
     public static boolean dynamicIsland = true;
     public static boolean modBadges = true;
 
