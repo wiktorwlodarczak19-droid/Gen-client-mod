@@ -6,7 +6,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import pl.genclient.config.ClientConfig;
 
-/** Common sharp GEN CLIENT presentation. No renderBackground/applyBlur calls are used here. */
+/**
+ * Common GEN CLIENT screen shell. The vanilla background blur is explicitly disabled:
+ * every screen paints its own crisp background and surfaces.
+ */
 public abstract class GenScreen extends Screen {
     private static final Identifier LOGO_TEXT = Identifier.of("genclient", "textures/gui/logo_text.png");
     protected final Screen parent;
@@ -16,41 +19,40 @@ public abstract class GenScreen extends Screen {
         this.parent = parent;
     }
 
-    /**
-     * Screen.render() invokes the vanilla background renderer before drawing widgets.
-     * Its default implementation applies the menu/game blur. GEN CLIENT paints its own
-     * backdrop in render(), so explicitly disable that second pass to keep the UI sharp.
-     */
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Intentionally empty: never apply Minecraft's fullscreen background blur.
+        // Intentionally empty. Do not apply Minecraft's fullscreen menu/game blur.
+    }
+
+    protected boolean showHeader() {
+        return true;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         drawBackdrop(context);
-        drawHeader(context);
+        if (showHeader()) drawHeader(context);
         drawPetals(context);
         renderBody(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
     }
 
-    /** Draw screen panels and labels here; widgets are drawn afterwards by Screen.render. */
     protected void renderBody(DrawContext context, int mouseX, int mouseY, float delta) {}
 
     protected void drawBackdrop(DrawContext context) {
         if (client != null && client.world != null) {
-            // Keep the 3D world crisp behind pause and in-game settings screens.
             context.fill(0, 0, width, height, 0xA807090E);
             return;
         }
 
         if (ClientConfig.wallpaper.equals("petal_mist")) {
-            drawPetalMist(context);
+            context.fillGradient(0, 0, width, height, 0xFF17131D, 0xFF07090E);
+            context.fillGradient(0, height / 3, width, height, 0x221C1828, 0xAA06080D);
         } else {
             Identifier wallpaper = wallpaperTexture();
-            context.drawTexture(wallpaper, 0, 0, width, height, 0.0f, 0.0f, 480, 270, 480, 270);
-            context.fillGradient(0, 0, width, height, 0x40060910, 0x9B07090E);
+            context.drawTexture(wallpaper, 0, 0, width, height,
+                    0.0f, 0.0f, 480, 270, 480, 270);
+            context.fillGradient(0, 0, width, height, 0x30060910, 0x9907090E);
         }
         context.fill(0, 0, width, 1, 0x22FFFFFF);
     }
@@ -62,22 +64,13 @@ public abstract class GenScreen extends Screen {
         };
     }
 
-    private void drawPetalMist(DrawContext context) {
-        context.fill(0, 0, width, height, 0xFF090B12);
-        context.fillGradient(0, 0, width, height, 0xFF18131E, 0xFF080B13);
-        int rose = (ClientConfig.accentColor() & 0x00FFFFFF) | 0x26000000;
-        int glowX = width * 3 / 4;
-        int glowY = height / 5;
-        roundedFill(context, glowX - 76, glowY - 28, 152, 76, 38, rose);
-        roundedFill(context, width / 7, height * 3 / 4, 116, 34, 17, 0x183C3657);
-    }
-
     private void drawHeader(DrawContext context) {
         if (client == null) return;
-        context.drawTexture(LOGO_TEXT, 28, 18, 152, 15, 0.0f, 0.0f, 687, 65, 687, 65);
-        context.drawText(client.textRenderer, "CLIENT EXPERIENCE  /  FABRIC 1.21.1", 30, 37, 0xFFB8BAC3, false);
-        int accent = ClientConfig.accentColor();
-        context.fill(width - 44, 24, width - 31, 37, accent);
+        context.drawTexture(LOGO_TEXT, 28, 18, 152, 15,
+                0.0f, 0.0f, 687, 65, 687, 65);
+        context.drawText(client.textRenderer, "CLIENT EXPERIENCE  /  FABRIC 1.21.1",
+                30, 37, 0xFFB8BAC3, false);
+        context.fill(width - 44, 24, width - 31, 37, ClientConfig.accentColor());
         context.drawText(client.textRenderer, "GEN", width - 27, 27, 0xFFE8EAF0, false);
     }
 
@@ -105,7 +98,8 @@ public abstract class GenScreen extends Screen {
         UiDraw.roundedFill(context, x, y, w, h, radius, color);
     }
 
-    protected void roundedPanel(DrawContext context, int x, int y, int w, int h, int radius, int fill, int border) {
+    protected void roundedPanel(DrawContext context, int x, int y, int w, int h,
+                               int radius, int fill, int border) {
         UiDraw.roundedPanel(context, x, y, w, h, radius, fill, border);
     }
 
