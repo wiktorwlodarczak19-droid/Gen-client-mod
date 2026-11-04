@@ -313,9 +313,6 @@ public final class GenMainMenuScreen extends GenScreen {
 
         int avatarTop = u(292);
         drawAccountSkin(context, centerX, avatarTop);
-        String username = client == null ? "Player" : client.getSession().getUsername();
-        context.drawCenteredTextWithShadow(textRenderer, username,
-                centerX, avatarTop + u(211), 0xD8F0F0F2);
     }
 
     private void drawAccountSkin(DrawContext context, int centerX, int top) {
