@@ -45,7 +45,7 @@ Dostępne efekty kosmetyczne:
 - Armor Glass Light 3D
 
 ## HUD
-- Dynamic Island: zegar lokalny, FPS, adres serwera i ping.
+- Dynamic Island: zegar lokalny, FPS, adres serwera, ping i rzeczywisty stan muzyki Minecrafta (ON/OFF).
 - Oznaczenia wykrytych modów Flashback i Mod Menu.
 - Tygodniowy czas gry liczony podczas aktywnej, niepauzowanej sesji świata.
 
