@@ -6,6 +6,8 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
+import pl.genclient.config.ClientConfig;
+import pl.genclient.gui.GenMainMenuScreen;
 import pl.genclient.gui.GenScreen;
 import pl.genclient.gui.VisualsScreen;
 
@@ -24,16 +26,30 @@ public final class GenClient implements ClientModInitializer {
 
         GenHud.register();
         VisualEffects.register();
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             VisualEffects.tick(client);
+
+            // Count only real, unpaused world time. The value is persisted once per minute.
+            if (client.player != null && client.world != null && !client.isPaused()) {
+                playtimeTicks++;
+                if (playtimeTicks >= 20) {
+                    playtimeTicks = 0;
+                    ClientConfig.recordPlaySecond();
+                }
+            } else {
+                playtimeTicks = 0;
+            }
+
             while (openVisualsKey.wasPressed()) {
-                if (client.player == null) continue;
-                if (client.currentScreen == null) {
-                    client.setScreen(new VisualsScreen(null));
-                } else if (client.currentScreen instanceof GenScreen genScreen) {
-                    genScreen.close();
+                if (client.currentScreen == null || client.currentScreen instanceof GenMainMenuScreen) {
+                    client.setScreen(new VisualsScreen(client.currentScreen));
+                } else if (client.currentScreen instanceof GenScreen screen) {
+                    screen.close();
                 }
             }
         });
     }
+
+    private int playtimeTicks;
 }
