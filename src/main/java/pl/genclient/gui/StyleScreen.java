@@ -63,7 +63,10 @@ public final class StyleScreen extends GenScreen {
         addDrawableChild(new GenButton(panelX + 34, footerY, 122, 24,
                 Text.literal("EXPORT CONFIG"), () -> configMessage = ClientConfig.exportConfig()));
         addDrawableChild(new GenButton(panelX + 166, footerY, 122, 24,
-                Text.literal("IMPORT FILE"), () -> configMessage = ClientConfig.importConfig()));
+                Text.literal("IMPORT FILE"), () -> {
+            configMessage = ClientConfig.importConfig();
+            refreshMessages();
+        }));
         addDrawableChild(new GenButton(panelX + panelWidth - 116, footerY, 82, 24,
                 Text.literal("BACK"), this::close));
     }
