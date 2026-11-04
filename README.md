@@ -32,6 +32,8 @@ Nie instaluj plików `*-dev.jar` ani `*-sources.jar`.
 - **Prawy Shift** — otwiera lub zamyka panel Visuals.
 - **Escape** — zamyka menu pauzy i wraca do gry.
 - Przełączniki Visuals są zapisywane do `config/genclient.json`.
+- W Style użyj **EXPORT CONFIG**, aby zapisać kopię `config/genclient-export.json`.
+- Aby zaimportować ustawienia, skopiuj plik eksportu jako `config/genclient-import.json` i naciśnij **IMPORT FILE**. Import waliduje znane pola, zapisuje aktywną konfigurację i odświeża przełączniki.
 
 Dostępne efekty kosmetyczne:
 - Jump Circle
