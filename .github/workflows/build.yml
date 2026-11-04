@@ -1,6 +1,9 @@
 name: Build GEN CLIENT
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/spotify-world-player
 
 permissions:
   contents: read
