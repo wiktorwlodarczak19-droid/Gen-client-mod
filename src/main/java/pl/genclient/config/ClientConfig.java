@@ -33,8 +33,11 @@ public final class ClientConfig {
         MODULES.put("Glass Vapor", true);
         MODULES.put("Target ESP", false);
         MODULES.put("Hit Sparks", true);
-        MODULES.put("Aura Glint", false);
-        MODULES.put("Armor Glass Light", false);
+        MODULES.put("Kill Effect", false);
+        MODULES.put("Custom Sky", false);
+        MODULES.put("Glint Hand", false);
+        MODULES.put("Aura Glint Light 3D", false);
+        MODULES.put("Armor Glass Light 3D", false);
         load();
     }
 
@@ -155,6 +158,12 @@ public final class ClientConfig {
                     ? root.getAsJsonObject("modules") : new JsonObject();
             for (Map.Entry<String, Boolean> entry : MODULES.entrySet()) {
                 JsonElement value = savedModules.get(entry.getKey());
+                if (value == null && entry.getKey().equals("Aura Glint Light 3D")) {
+                    value = savedModules.get("Aura Glint");
+                }
+                if (value == null && entry.getKey().equals("Armor Glass Light 3D")) {
+                    value = savedModules.get("Armor Glass Light");
+                }
                 if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isBoolean()) {
                     entry.setValue(value.getAsBoolean());
                 }
