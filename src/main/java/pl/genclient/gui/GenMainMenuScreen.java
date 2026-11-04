@@ -30,6 +30,8 @@ public final class GenMainMenuScreen extends GenScreen {
 
     private static final Identifier LOGO_MARK = Identifier.of("genclient", "textures/gui/logo_mark.png");
     private static final Identifier LOGO_TEXT = Identifier.of("genclient", "textures/gui/logo_text.png");
+    private static final Identifier MOUNTAIN_BACKGROUND = Identifier.of(
+            "genclient", "textures/gui/wallpapers/main_menu_mountains.jpg");
     private static final String SKIN_URL = "https://www.minecraft.net/msaprofile/mygames/editskin";
 
     private final Page page;
@@ -132,45 +134,17 @@ public final class GenMainMenuScreen extends GenScreen {
 
     @Override
     protected void drawBackdrop(DrawContext context) {
-        int topColor = ClientConfig.wallpaper.equals("midnight_ink") ? 0xFF05070B
-                : ClientConfig.wallpaper.equals("petal_mist") ? 0xFF0D0A12 : 0xFF050607;
-        int bottomColor = ClientConfig.wallpaper.equals("midnight_ink") ? 0xFF111824
-                : ClientConfig.wallpaper.equals("petal_mist") ? 0xFF1A1420 : 0xFF131416;
-        context.fillGradient(0, 0, width, height, topColor, bottomColor);
-        context.fillGradient(0, height / 3, width, height, 0x08000000, 0xAA050607);
-        drawMountainRange(context, (int) (height * 0.78f), (int) (height * 0.20f),
-                0.19f, 0xFF34383D, 0xFF111214, 0);
-        drawMountainRange(context, (int) (height * 0.83f), (int) (height * 0.15f),
-                0.69f, 0xFF55585E, 0xFF17181B, 1);
-        drawMountainRange(context, (int) (height * 0.91f), (int) (height * 0.10f),
-                0.90f, 0xFF777A80, 0xFF222326, 2);
-        context.fill(0, 0, width, 1, 0x24FFFFFF);
-    }
+        // Photographic monochrome mountain artwork from the supplied launcher reference.
+        context.drawTexture(MOUNTAIN_BACKGROUND, 0, 0, width, height,
+                0.0f, 0.0f, 640, 360, 640, 360);
+        context.fillGradient(0, 0, width, height, 0x12000000, 0x5005060A);
 
-    private void drawMountainRange(DrawContext context, int baseY, int amplitude,
-                                   float peakPosition, int ridgeColor, int baseColor, int layer) {
-        int step = Math.max(2, u(4));
-        for (int x = 0; x < width; x += step) {
-            double nx = x / (double) Math.max(width, 1);
-            double peak = Math.exp(-Math.pow((nx - peakPosition) / (layer == 2 ? 0.105 : 0.16), 2.0));
-            double secondary = Math.exp(-Math.pow((nx - (peakPosition - 0.22)) / 0.11, 2.0));
-            double wave = Math.sin(nx * 23.0 + layer * 2.1) * amplitude * 0.055
-                    + Math.sin(nx * 57.0 + layer * 1.7) * amplitude * 0.018;
-            int ridge = (int) (baseY - amplitude * (0.20 + peak * 0.92 + secondary * 0.22) + wave);
-            ridge = Math.max(0, Math.min(height, ridge));
-            int hash = (int) ((x * 1103515245L + layer * 12345L) >>> 24) & 31;
-            int shade = Math.max(0, Math.min(255, hash - 13));
-            int top = (ridgeColor & 0x00FFFFFF) | 0xD0000000;
-            int bottom = (baseColor & 0x00FFFFFF) | 0xF0000000;
-            context.fillGradient(x, ridge, Math.min(width, x + step + 1), height,
-                    top + (shade << 16) + (shade << 8) + shade,
-                    bottom + (shade / 3 << 16) + (shade / 3 << 8) + shade / 3);
-            if ((x / step) % 7 == 0) {
-                int facetHeight = Math.max(u(4), amplitude / 18);
-                context.fill(x, ridge + u(2), Math.min(width, x + 1), Math.min(height, ridge + facetHeight),
-                        0x187F8084);
-            }
+        if (ClientConfig.wallpaper.equals("midnight_ink")) {
+            context.fill(0, 0, width, height, 0x241B2C42);
+        } else if (ClientConfig.wallpaper.equals("petal_mist")) {
+            context.fill(0, 0, width, height, 0x281B1123);
         }
+        context.fill(0, 0, width, 1, 0x28FFFFFF);
     }
 
     @Override
