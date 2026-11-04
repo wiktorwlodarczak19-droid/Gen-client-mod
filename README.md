@@ -26,7 +26,7 @@ Nie instaluj plików `*-dev.jar` ani `*-sources.jar`.
 - Nick pochodzi z aktualnej sesji Minecrafta, a wersja jest stała (1.21.1 / Fabric). Mod nie jest osobnym launcherem, więc nie zmienia wersji gry ani konta Microsoft.
 - Podgląd skina używa tekstury aktualnego profilu. Przycisk Choose Skin otwiera stronę profilu Minecraft. Quit Game zamyka grę; nie wykonuje wylogowania konta Microsoft.
 - Mods pokazuje mody wykryte przez Fabric Loader.
-- Style przełącza akcent, tapetę, płatki sakury, Dynamic Island i oznaczenia dodatkowych modów.
+- Style przełącza akcent, tapetę, płatki sakury, Dynamic Island, oznaczenia dodatkowych modów i otwiera konfigurację Spotify.
 
 ## Panel Visuals i sterowanie
 - **Prawy Shift** — otwiera lub zamyka panel Visuals.
@@ -47,7 +47,20 @@ Dostępne efekty kosmetyczne:
 - Armor Glass Light 3D
 
 ## HUD
-- Dynamic Island: zegar lokalny, FPS, adres serwera, ping i rzeczywisty stan muzyki Minecrafta (ON/OFF).
+- Dynamic Island: zegar lokalny, FPS, adres serwera, ping oraz tytuł, wykonawca i postęp aktualnego utworu Spotify.
+- Podczas odtwarzania w Spotify nad postacią pojawia się subtelna karta 3D z tytułem i wykonawcą.
+- Style → Spotify udostępnia połączenie konta oraz przyciski poprzedni / play-pause / następny.
+- Dźwięk pozostaje odtwarzany przez aplikację Spotify na aktywnym urządzeniu; GEN CLIENT pobiera metadane i wysyła polecenia sterowania. Nie streamuje dźwięku do Minecrafta.
+
+### Konfiguracja Spotify
+1. Utwórz aplikację w [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. W jej ustawieniach dodaj Redirect URI: `http://127.0.0.1`.
+3. W grze otwórz Style → Spotify, wklej Client ID i wybierz CONNECT SPOTIFY.
+4. Zaloguj się w przeglądarce i zaakceptuj uprawnienia. Odtwórz utwór na aktywnym urządzeniu Spotify.
+5. Sterowanie odtwarzaniem przez Web API wymaga konta Spotify Premium. W trybie Development właściciel aplikacji musi mieć Premium, a użytkownicy testowi muszą być na allowliście.
+6. Ustawienia i token odświeżania są zapisane lokalnie w `config/genclient-spotify.json`. Nie udostępniaj tego pliku — token umożliwia dostęp do konta w zakresie zaakceptowanych uprawnień.
+
+**Ważne:** aktualna Spotify Developer Policy ogranicza używanie Spotify Platform w grach i synchronizowanie nagrań z mediami wizualnymi. Integracja w modzie Minecraft może wymagać pisemnej zgody Spotify; przed publiczną dystrybucją należy uzyskać potwierdzenie zgodności. Wersja GEN CLIENT nie pobiera ani nie modyfikuje plików audio.
 - Oznaczenia wykrytych modów Flashback i Mod Menu.
 - Tygodniowy czas gry liczony podczas aktywnej, niepauzowanej sesji świata.
 
