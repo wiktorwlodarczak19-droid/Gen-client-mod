@@ -327,7 +327,7 @@ public final class GenMainMenuScreen extends GenScreen {
             skin = DefaultSkinHelper.getSkinTextures(client.getGameProfile()).texture();
         }
 
-        int pixel = u(6);
+        int pixel = u(7);
         int head = pixel * 8;
         int bodyWidth = pixel * 8;
         int armWidth = pixel * 4;
