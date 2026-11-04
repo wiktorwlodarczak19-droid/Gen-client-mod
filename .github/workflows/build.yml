@@ -10,49 +10,63 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10.2"
 
-      - name: Inspect and verify source layout
+      - name: Verify complete project layout
         shell: bash
         run: |
           set -euo pipefail
-          echo "=== Java sources in checkout ==="
-          find src/main/java -type f -name '*.java' -print
-          echo "=== Resources in checkout ==="
-          find src/main/resources -type f -print
-          test -f src/main/java/pl/genclient/GenClient.java
-          test -f src/main/java/pl/genclient/VisualsScreen.java
-          test -f src/main/java/pl/genclient/ModBadgeHud.java
+          test -f src/main/java/pl/genclient/client/GenClient.java
+          test -f src/main/java/pl/genclient/client/GenHud.java
+          test -f src/main/java/pl/genclient/client/VisualEffects.java
+          test -f src/main/java/pl/genclient/config/ClientConfig.java
+          test -f src/main/java/pl/genclient/gui/GenMainMenuScreen.java
+          test -f src/main/java/pl/genclient/gui/GenPauseMenuScreen.java
+          test -f src/main/java/pl/genclient/gui/VisualsScreen.java
+          test -f src/main/java/pl/genclient/gui/StyleScreen.java
           test -f src/main/resources/fabric.mod.json
+          test -f src/main/resources/genclient.mixins.json
+          echo "All GEN CLIENT sources and resources are present."
 
-      - name: Build mod with Fabric Loom
+      - name: Build with Fabric Loom
         run: gradle --no-daemon --no-build-cache clean build
 
-      - name: Verify the remapped Fabric JAR
+      - name: Verify the installable remapped JAR
         shell: bash
         run: |
           set -euo pipefail
-          JAR="build/libs/gen-client-0.1.0.jar"
+          VERSION="$(grep '^mod_version=' gradle.properties | cut -d= -f2)"
+          JAR="build/libs/gen-client-${VERSION}.jar"
 
-          echo "=== Build output archives ==="
-          find build -type f -name '*.jar' -printf '%p (%s bytes)\n' | sort
-          echo "=== Expected distributable ==="
+          echo "=== Generated archives ==="
+          find build/libs -maxdepth 1 -type f -name '*.jar' -printf '%f (%s bytes)\n' | sort
+
           test -s "$JAR"
           SIZE="$(stat -c '%s' "$JAR")"
-          echo "JAR size: $SIZE bytes"
-          test "$SIZE" -gt 1000
+          echo "Installable JAR size: $SIZE bytes"
+          test "$SIZE" -gt 5000
 
           jar tf "$JAR" | tee /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/GenClient.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/VisualsScreen.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/ModBadgeHud.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/client/GenClient.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/client/GenHud.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/client/VisualEffects.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/gui/GenMainMenuScreen.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/gui/GenPauseMenuScreen.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/gui/VisualsScreen.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/gui/StyleScreen.class' /tmp/gen-client-jar-contents.txt
+          grep -qx 'pl/genclient/config/ClientConfig.class' /tmp/gen-client-jar-contents.txt
           grep -qx 'fabric.mod.json' /tmp/gen-client-jar-contents.txt
+          grep -qx 'genclient.mixins.json' /tmp/gen-client-jar-contents.txt
+          grep -qx 'assets/genclient/textures/gui/logo_mark.png' /tmp/gen-client-jar-contents.txt
+          grep -qx 'assets/genclient/textures/gui/logo_text.png' /tmp/gen-client-jar-contents.txt
 
           unzip -p "$JAR" fabric.mod.json > /tmp/gen-client-fabric-mod.json
           python3 - <<'PY'
@@ -62,17 +76,17 @@ jobs:
           metadata = json.loads(Path("/tmp/gen-client-fabric-mod.json").read_text())
           assert metadata["id"] == "genclient", metadata
           assert metadata["environment"] == "client", metadata
-          assert metadata["entrypoints"]["client"] == ["pl.genclient.GenClient"], metadata
-          assert metadata["version"] == "0.1.0", metadata
+          assert metadata["version"] == "0.2.0", metadata
+          assert metadata["entrypoints"]["client"] == ["pl.genclient.client.GenClient"], metadata
+          assert "genclient.mixins.json" in metadata["mixins"], metadata
           print(json.dumps(metadata, indent=2))
           PY
 
           mkdir -p build/distribution
           cp "$JAR" build/distribution/GEN-CLIENT-1.21.1.jar
           test -s build/distribution/GEN-CLIENT-1.21.1.jar
-          echo "Verified final installable JAR:"
-          ls -lh build/distribution/GEN-CLIENT-1.21.1.jar
           jar tf build/distribution/GEN-CLIENT-1.21.1.jar >/dev/null
+          sha256sum build/distribution/GEN-CLIENT-1.21.1.jar
 
       - uses: actions/upload-artifact@v4
         with:
