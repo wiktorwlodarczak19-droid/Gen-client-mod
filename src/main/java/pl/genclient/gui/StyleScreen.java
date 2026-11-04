@@ -28,8 +28,8 @@ public final class StyleScreen extends GenScreen {
         panelY = Math.max(58, (height - panelHeight) / 2);
         buttonX = panelX + 34;
         buttonWidth = panelWidth - 68;
-        firstY = panelY + Math.max(88, panelHeight / 4);
-        rowGap = Math.max(30, Math.min(39, (panelHeight - 126) / 5));
+        firstY = panelY + Math.max(78, Math.min(92, panelHeight / 4));
+        rowGap = Math.max(22, Math.min(39, (panelHeight - 162) / 4));
 
         addDrawableChild(new GenButton(buttonX, firstY, buttonWidth, 26, accentLabel(), () -> {
             ClientConfig.cycleAccent();
@@ -57,7 +57,7 @@ public final class StyleScreen extends GenScreen {
             ClientConfig.save();
             refreshMessages();
         }));
-        addDrawableChild(new GenButton(panelX + panelWidth - 144, panelY + panelHeight - 46,
+        addDrawableChild(new GenButton(panelX + panelWidth - 144, panelY + panelHeight - 34,
                 110, 24, Text.literal("BACK"), this::close));
     }
 
