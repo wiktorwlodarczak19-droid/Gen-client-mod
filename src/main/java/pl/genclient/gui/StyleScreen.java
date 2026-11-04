@@ -14,6 +14,7 @@ public final class StyleScreen extends GenScreen {
     private int buttonWidth;
     private int firstY;
     private int rowGap;
+    private String configMessage = "CONFIG  /  config/genclient.json";
 
     public StyleScreen(Screen parent) {
         super(Text.literal("GEN CLIENT STYLE"), parent);
@@ -57,8 +58,14 @@ public final class StyleScreen extends GenScreen {
             ClientConfig.save();
             refreshMessages();
         }));
-        addDrawableChild(new GenButton(panelX + panelWidth - 144, panelY + panelHeight - 34,
-                110, 24, Text.literal("BACK"), this::close));
+
+        int footerY = panelY + panelHeight - 42;
+        addDrawableChild(new GenButton(panelX + 34, footerY, 122, 24,
+                Text.literal("EXPORT CONFIG"), () -> configMessage = ClientConfig.exportConfig()));
+        addDrawableChild(new GenButton(panelX + 166, footerY, 122, 24,
+                Text.literal("IMPORT FILE"), () -> configMessage = ClientConfig.importConfig()));
+        addDrawableChild(new GenButton(panelX + panelWidth - 116, footerY, 82, 24,
+                Text.literal("BACK"), this::close));
     }
 
     @Override
@@ -72,7 +79,7 @@ public final class StyleScreen extends GenScreen {
         context.drawText(textRenderer, "ATMOSPHERE", panelX + 34, firstY + rowGap * 2 - 14, 0xFF8F98A8, false);
         context.drawText(textRenderer, "HUD", panelX + 34, firstY + rowGap * 3 - 14, 0xFF8F98A8, false);
         context.drawText(textRenderer, "INTEGRATION", panelX + 34, firstY + rowGap * 4 - 14, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "Settings are stored in config/genclient.json",
+        context.drawText(textRenderer, textRenderer.trimToWidth(configMessage, panelWidth - 68),
                 panelX + 34, panelY + panelHeight - 14, 0xFF858D9B, false);
     }
 
