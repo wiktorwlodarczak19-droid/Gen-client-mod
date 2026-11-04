@@ -36,7 +36,7 @@ public final class GenHud {
 
     private static void drawIsland(DrawContext context, MinecraftClient client) {
         int screenWidth = client.getWindow().getScaledWidth();
-        int islandWidth = 380;
+        int islandWidth = 520;
         int x = screenWidth / 2 - islandWidth / 2;
         int y = 7;
         int accent = ClientConfig.accentColor();
@@ -68,16 +68,24 @@ public final class GenHud {
         }
         context.drawText(client.textRenderer, Text.literal(lowerLabel), x + 220, y + 21, 0xFF9BA2B0, false);
 
-        boolean musicPlaying = client.getMusicTracker().isPlayingType(client.getMusicType());
-        int musicColor = musicPlaying ? accent : 0xFF858D9B;
-        context.drawCenteredTextWithShadow(client.textRenderer,
-                Text.literal(musicPlaying ? "♪ ON" : "♪ OFF"), x + 347, y + 8, musicColor);
-        context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("MUSIC"),
-                x + 347, y + 21, 0xFF858D9B);
+        SpotifyService.TrackSnapshot track = SpotifyService.getSnapshot();
+        String trackTitle = track.hasTrack() ? track.title() : "SPOTIFY NOT CONNECTED";
+        String trackArtist = track.hasTrack()
+                ? track.artists() + "  ·  " + track.progressLabel()
+                : "STYLE  /  SPOTIFY TO CONNECT";
+        trackTitle = client.textRenderer.trimToWidth(trackTitle, 164);
+        trackArtist = client.textRenderer.trimToWidth(trackArtist, 164);
 
-        context.fill(x + 116, y + 8, x + 117, y + 30, 0x2EFFFFFF);
-        context.fill(x + 207, y + 8, x + 208, y + 30, 0x2EFFFFFF);
-        context.fill(x + 316, y + 8, x + 317, y + 30, 0x2EFFFFFF);
+        int musicColor = track.hasTrack() && track.isPlaying() ? 0xFF8EE3B2 : 0xFF858D9B;
+        UiDraw.roundedFill(context, x + 328, y + 15, 4, 4, 2, musicColor);
+        context.drawTextWithShadow(client.textRenderer, Text.literal(trackTitle),
+                x + 340, y + 8, track.hasTrack() ? 0xFFFFFFFF : 0xFFB9C0CC);
+        context.drawText(client.textRenderer, Text.literal(trackArtist),
+                x + 340, y + 21, 0xFF9BA2B0, false);
+
+        context.fill(x + 112, y + 8, x + 113, y + 30, 0x2EFFFFFF);
+        context.fill(x + 208, y + 8, x + 209, y + 30, 0x2EFFFFFF);
+        context.fill(x + 320, y + 8, x + 321, y + 30, 0x2EFFFFFF);
     }
 
     private static void drawTarget(DrawContext context, MinecraftClient client) {
