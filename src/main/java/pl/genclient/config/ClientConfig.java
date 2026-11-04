@@ -15,10 +15,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Persistent, client-only settings and real weekly playtime counters. */
+/** Persistent client settings, portable config import/export and weekly playtime counters. */
 public final class ClientConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("genclient.json");
+    private static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
+    private static final Path FILE = CONFIG_DIR.resolve("genclient.json");
+    private static final Path EXPORT_FILE = CONFIG_DIR.resolve("genclient-export.json");
+    private static final Path IMPORT_FILE = CONFIG_DIR.resolve("genclient-import.json");
     private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
     private static final Map<String, Long> PLAYTIME = new LinkedHashMap<>();
 
@@ -127,7 +130,44 @@ public final class ClientConfig {
         return (minutes / 60L) + "h " + (minutes % 60L) + "m  this week";
     }
 
+    /** Writes a portable copy without replacing the live settings file. */
+    public static String exportConfig() {
+        try {
+            Files.createDirectories(CONFIG_DIR);
+            Files.writeString(EXPORT_FILE, GSON.toJson(toJson()));
+            return "EXPORTED  /  config/genclient-export.json";
+        } catch (IOException exception) {
+            System.err.println("[GEN CLIENT] Could not export settings: " + exception.getMessage());
+            return "EXPORT FAILED  /  check config folder permissions";
+        }
+    }
+
+    /** Imports config/genclient-import.json, validates known fields, and saves it as the live config. */
+    public static String importConfig() {
+        if (!Files.isRegularFile(IMPORT_FILE)) {
+            return "IMPORT FILE NOT FOUND  /  place genclient-import.json in config";
+        }
+        try {
+            JsonObject root = JsonParser.parseString(Files.readString(IMPORT_FILE)).getAsJsonObject();
+            apply(root);
+            save();
+            return "IMPORTED  /  settings updated";
+        } catch (Exception exception) {
+            System.err.println("[GEN CLIENT] Could not import settings: " + exception.getMessage());
+            return "IMPORT FAILED  /  invalid JSON or unsupported values";
+        }
+    }
+
     public static void save() {
+        try {
+            Files.createDirectories(CONFIG_DIR);
+            Files.writeString(FILE, GSON.toJson(toJson()));
+        } catch (IOException exception) {
+            System.err.println("[GEN CLIENT] Could not save settings: " + exception.getMessage());
+        }
+    }
+
+    private static JsonObject toJson() {
         JsonObject root = new JsonObject();
         JsonObject modules = new JsonObject();
         MODULES.forEach(modules::addProperty);
@@ -141,59 +181,66 @@ public final class ClientConfig {
         JsonObject playtime = new JsonObject();
         PLAYTIME.forEach(playtime::addProperty);
         root.add("playtime", playtime);
-
-        try {
-            Files.createDirectories(FILE.getParent());
-            Files.writeString(FILE, GSON.toJson(root));
-        } catch (IOException exception) {
-            System.err.println("[GEN CLIENT] Could not save settings: " + exception.getMessage());
-        }
+        return root;
     }
 
     private static void load() {
         if (!Files.isRegularFile(FILE)) return;
         try {
-            JsonObject root = JsonParser.parseString(Files.readString(FILE)).getAsJsonObject();
-            JsonObject savedModules = root.has("modules") && root.get("modules").isJsonObject()
-                    ? root.getAsJsonObject("modules") : new JsonObject();
-            for (Map.Entry<String, Boolean> entry : MODULES.entrySet()) {
-                JsonElement value = savedModules.get(entry.getKey());
-                if (value == null && entry.getKey().equals("Aura Glint Light 3D")) {
-                    value = savedModules.get("Aura Glint");
-                }
-                if (value == null && entry.getKey().equals("Armor Glass Light 3D")) {
-                    value = savedModules.get("Armor Glass Light");
-                }
-                if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isBoolean()) {
-                    entry.setValue(value.getAsBoolean());
-                }
-            }
-            if (root.has("accent")) accent = safeAccent(root.get("accent").getAsString());
-            if (root.has("wallpaper")) {
-                String saved = root.get("wallpaper").getAsString();
-                if (saved.equals("sakura_dark") || saved.equals("midnight_ink") || saved.equals("petal_mist")) {
-                    wallpaper = saved;
-                }
-            }
-            if (root.has("sakuraPetals")) sakuraPetals = root.get("sakuraPetals").getAsBoolean();
-            if (root.has("dynamicIsland")) dynamicIsland = root.get("dynamicIsland").getAsBoolean();
-            if (root.has("modBadges")) modBadges = root.get("modBadges").getAsBoolean();
+            apply(JsonParser.parseString(Files.readString(FILE)).getAsJsonObject());
+        } catch (Exception exception) {
+            System.err.println("[GEN CLIENT] Settings file could not be read; using defaults: " + exception.getMessage());
+        }
+    }
 
-            if (root.has("playtime") && root.get("playtime").isJsonObject()) {
-                JsonObject savedTime = root.getAsJsonObject("playtime");
-                for (Map.Entry<String, JsonElement> entry : savedTime.entrySet()) {
-                    if (entry.getValue().isJsonPrimitive() && entry.getValue().getAsJsonPrimitive().isNumber()) {
-                        try {
-                            LocalDate.parse(entry.getKey());
-                            PLAYTIME.put(entry.getKey(), Math.max(0L, entry.getValue().getAsLong()));
-                        } catch (Exception ignored) {
-                            // Ignore malformed dates in an edited config file.
-                        }
+    private static void apply(JsonObject root) {
+        JsonObject savedModules = root.has("modules") && root.get("modules").isJsonObject()
+                ? root.getAsJsonObject("modules") : new JsonObject();
+        for (Map.Entry<String, Boolean> entry : MODULES.entrySet()) {
+            JsonElement value = savedModules.get(entry.getKey());
+            if (value == null && entry.getKey().equals("Aura Glint Light 3D")) {
+                value = savedModules.get("Aura Glint");
+            }
+            if (value == null && entry.getKey().equals("Armor Glass Light 3D")) {
+                value = savedModules.get("Armor Glass Light");
+            }
+            if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isBoolean()) {
+                entry.setValue(value.getAsBoolean());
+            }
+        }
+
+        if (root.has("accent") && root.get("accent").isJsonPrimitive()) {
+            accent = safeAccent(root.get("accent").getAsString());
+        }
+        if (root.has("wallpaper") && root.get("wallpaper").isJsonPrimitive()) {
+            String saved = root.get("wallpaper").getAsString();
+            if (saved.equals("sakura_dark") || saved.equals("midnight_ink") || saved.equals("petal_mist")) {
+                wallpaper = saved;
+            }
+        }
+        if (root.has("sakuraPetals") && root.get("sakuraPetals").isJsonPrimitive()) {
+            sakuraPetals = root.get("sakuraPetals").getAsBoolean();
+        }
+        if (root.has("dynamicIsland") && root.get("dynamicIsland").isJsonPrimitive()) {
+            dynamicIsland = root.get("dynamicIsland").getAsBoolean();
+        }
+        if (root.has("modBadges") && root.get("modBadges").isJsonPrimitive()) {
+            modBadges = root.get("modBadges").getAsBoolean();
+        }
+
+        if (root.has("playtime") && root.get("playtime").isJsonObject()) {
+            PLAYTIME.clear();
+            JsonObject savedTime = root.getAsJsonObject("playtime");
+            for (Map.Entry<String, JsonElement> entry : savedTime.entrySet()) {
+                if (entry.getValue().isJsonPrimitive() && entry.getValue().getAsJsonPrimitive().isNumber()) {
+                    try {
+                        LocalDate.parse(entry.getKey());
+                        PLAYTIME.put(entry.getKey(), Math.max(0L, entry.getValue().getAsLong()));
+                    } catch (Exception ignored) {
+                        // Ignore malformed dates in an edited config file.
                     }
                 }
             }
-        } catch (Exception exception) {
-            System.err.println("[GEN CLIENT] Settings file could not be read; using defaults: " + exception.getMessage());
         }
     }
 
