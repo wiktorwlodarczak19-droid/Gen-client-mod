@@ -34,6 +34,10 @@ jobs:
           test -f src/main/java/pl/genclient/gui/StyleScreen.java
           test -f src/main/resources/fabric.mod.json
           test -f src/main/resources/genclient.mixins.json
+          test -f src/main/resources/assets/genclient/textures/gui/logo_mark.png
+          test -f src/main/resources/assets/genclient/textures/gui/logo_text.png
+          test -f src/main/resources/assets/genclient/textures/gui/wallpapers/sakura_dark.jpg
+          test -f src/main/resources/assets/genclient/textures/gui/wallpapers/midnight_ink.jpg
           echo "All GEN CLIENT sources and resources are present."
 
       - name: Build with Fabric Loom
@@ -52,21 +56,32 @@ jobs:
           test -s "$JAR"
           SIZE="$(stat -c '%s' "$JAR")"
           echo "Installable JAR size: $SIZE bytes"
-          test "$SIZE" -gt 5000
+          test "$SIZE" -gt 12000
 
           jar tf "$JAR" | tee /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/client/GenClient.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/client/GenHud.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/client/VisualEffects.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/gui/GenMainMenuScreen.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/gui/GenPauseMenuScreen.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/gui/VisualsScreen.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/gui/StyleScreen.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'pl/genclient/config/ClientConfig.class' /tmp/gen-client-jar-contents.txt
-          grep -qx 'fabric.mod.json' /tmp/gen-client-jar-contents.txt
-          grep -qx 'genclient.mixins.json' /tmp/gen-client-jar-contents.txt
-          grep -qx 'assets/genclient/textures/gui/logo_mark.png' /tmp/gen-client-jar-contents.txt
-          grep -qx 'assets/genclient/textures/gui/logo_text.png' /tmp/gen-client-jar-contents.txt
+          for entry in \
+            pl/genclient/client/GenClient.class \
+            pl/genclient/client/GenHud.class \
+            pl/genclient/client/VisualEffects.class \
+            pl/genclient/config/ClientConfig.class \
+            pl/genclient/gui/GenButton.class \
+            pl/genclient/gui/GenMainMenuScreen.class \
+            pl/genclient/gui/GenPauseMenuScreen.class \
+            pl/genclient/gui/GenScreen.class \
+            pl/genclient/gui/StyleScreen.class \
+            pl/genclient/gui/UiDraw.class \
+            pl/genclient/gui/VisualsScreen.class \
+            fabric.mod.json \
+            genclient.mixins.json \
+            assets/genclient/textures/gui/logo_mark.png \
+            assets/genclient/textures/gui/logo_text.png \
+            assets/genclient/textures/gui/wallpapers/sakura_dark.jpg \
+            assets/genclient/textures/gui/wallpapers/midnight_ink.jpg \
+            assets/genclient/lang/pl_pl.json \
+            assets/genclient/lang/en_us.json
+          do
+            grep -qx "$entry" /tmp/gen-client-jar-contents.txt
+          done
 
           unzip -p "$JAR" fabric.mod.json > /tmp/gen-client-fabric-mod.json
           python3 - <<'PY'
