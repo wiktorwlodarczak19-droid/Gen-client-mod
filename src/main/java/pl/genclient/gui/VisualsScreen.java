@@ -17,23 +17,36 @@ public final class VisualsScreen extends GenScreen {
         super(Text.literal("GEN CLIENT VISUALS"), parent);
     }
 
+    private int panelWidth;
+    private int panelHeight;
+    private int panelX;
+    private int panelY;
+    private int cardWidth;
+    private int startX;
+    private int startY;
+    private int rowGap;
+
     @Override
     protected void init() {
-        int panelWidth = Math.min(690, width - 40);
-        int panelX = (width - panelWidth) / 2;
-        int panelY = Math.max(72, (height - 390) / 2);
+        panelWidth = Math.min(690, width - 40);
+        panelHeight = Math.min(390, height - 96);
+        panelHeight = Math.max(220, panelHeight);
+        panelX = (width - panelWidth) / 2;
+        panelY = Math.max(58, (height - panelHeight) / 2);
+
         int gap = 16;
-        int cardWidth = (panelWidth - 64 - gap) / 2;
-        int startX = panelX + 24;
-        int startY = panelY + 112;
+        cardWidth = (panelWidth - 64 - gap) / 2;
+        startX = panelX + 24;
+        startY = panelY + Math.max(78, panelHeight / 3);
+        rowGap = Math.max(43, Math.min(66, (panelHeight - 142) / 3));
 
         for (int i = 0; i < MODULES.size(); i++) {
             String module = MODULES.get(i);
             int column = i % 2;
             int row = i / 2;
             int x = startX + column * (cardWidth + gap);
-            int y = startY + row * 66;
-            addDrawableChild(new GenButton(x, y, cardWidth, 30, moduleState(module), () -> {
+            int y = startY + row * rowGap;
+            addDrawableChild(new GenButton(x, y, cardWidth, 28, moduleState(module), () -> {
                 ClientConfig.toggle(module);
                 for (var child : children()) {
                     if (child instanceof GenButton button && button.getMessage().getString().endsWith(module)) {
@@ -44,37 +57,36 @@ public final class VisualsScreen extends GenScreen {
             }));
         }
 
-        addDrawableChild(new GenButton(panelX + 24, panelY + 330, 180, 24,
+        int footerY = panelY + panelHeight - 42;
+        addDrawableChild(new GenButton(panelX + 24, footerY, 180, 24,
                 Text.literal("STYLE SETTINGS"), () -> client.setScreen(new StyleScreen(this))));
-        addDrawableChild(new GenButton(panelX + panelWidth - 154, panelY + 330, 130, 24,
+        addDrawableChild(new GenButton(panelX + panelWidth - 154, footerY, 130, 24,
                 Text.literal("CLOSE"), this::close));
     }
 
     @Override
     protected void renderBody(DrawContext context, int mouseX, int mouseY, float delta) {
-        int panelWidth = Math.min(690, width - 40);
-        int panelX = (width - panelWidth) / 2;
-        int panelY = Math.max(72, (height - 390) / 2);
-        drawPanel(context, panelX, panelY, panelWidth, 390);
-        drawSectionTitle(context, "VISUAL MODULES", "Toggle client-side effects. Your choices are saved automatically.",
+        drawPanel(context, panelX, panelY, panelWidth, panelHeight);
+        drawSectionTitle(context, "VISUAL MODULES",
+                "Cosmetic client-side effects. Changes are saved automatically.",
                 panelX + 24, panelY + 25);
 
         String[] descriptions = {
                 "Particle ring beneath you while airborne.",
                 "Soft glass-like vapor when you move.",
-                "Small clean marker for the entity under your crosshair.",
-                "Cosmetic sparks when you swing at an entity.",
+                "Small marker for the entity under your crosshair.",
+                "Cosmetic sparks when you hit an entity.",
                 "Orbiting enchantment glints around your player.",
                 "Subtle light particles while wearing a chestplate."
         };
-        int cardWidth = (panelWidth - 64 - 16) / 2;
         for (int i = 0; i < descriptions.length; i++) {
-            int x = panelX + 24 + (i % 2) * (cardWidth + 16);
-            int y = panelY + 145 + (i / 2) * 66;
-            context.drawText(textRenderer, descriptions[i], x + 8, y, 0xFF9DA5B4, false);
+            int x = startX + (i % 2) * (cardWidth + 16);
+            int y = startY + (i / 2) * rowGap + 33;
+            context.drawText(textRenderer, textRenderer.trimToWidth(descriptions[i], cardWidth - 12),
+                    x + 6, y, 0xFF9DA5B4, false);
         }
-        context.drawText(textRenderer, "RIGHT SHIFT  /  OPEN OR CLOSE IN GAME", panelX + 24,
-                panelY + 367, 0xFF858D9B, false);
+        context.drawText(textRenderer, "RIGHT SHIFT  /  OPEN OR CLOSE IN GAME",
+                panelX + 24, panelY + panelHeight - 14, 0xFF858D9B, false);
     }
 
     @Override
