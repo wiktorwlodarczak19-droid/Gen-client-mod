@@ -69,6 +69,7 @@ jobs:
             pl/genclient/client/VisualEffects.class \
             pl/genclient/config/ClientConfig.class \
             pl/genclient/gui/GenButton.class \
+            pl/genclient/gui/GenHubScreen.class \
             pl/genclient/gui/GenMainMenuScreen.class \
             pl/genclient/gui/GenPauseMenuScreen.class \
             pl/genclient/gui/GenScreen.class \
