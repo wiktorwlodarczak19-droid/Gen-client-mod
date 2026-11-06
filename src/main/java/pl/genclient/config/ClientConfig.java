@@ -29,6 +29,8 @@ public final class ClientConfig {
     public static String wallpaper = "sakura_dark";
     public static boolean sakuraPetals = false;
     public static boolean dynamicIsland = true;
+    public static boolean fpsCounter = true;
+    public static boolean fpsCounterLabel = false;
     public static boolean modBadges = true;
 
     static {
@@ -176,6 +178,8 @@ public final class ClientConfig {
         root.addProperty("wallpaper", wallpaper);
         root.addProperty("sakuraPetals", sakuraPetals);
         root.addProperty("dynamicIsland", dynamicIsland);
+        root.addProperty("fpsCounter", fpsCounter);
+        root.addProperty("fpsCounterLabel", fpsCounterLabel);
         root.addProperty("modBadges", modBadges);
 
         JsonObject playtime = new JsonObject();
@@ -223,6 +227,14 @@ public final class ClientConfig {
         }
         if (root.has("dynamicIsland") && root.get("dynamicIsland").isJsonPrimitive()) {
             dynamicIsland = root.get("dynamicIsland").getAsBoolean();
+        }
+        if (root.has("fpsCounter") && root.get("fpsCounter").isJsonPrimitive()
+                && root.get("fpsCounter").getAsJsonPrimitive().isBoolean()) {
+            fpsCounter = root.get("fpsCounter").getAsBoolean();
+        }
+        if (root.has("fpsCounterLabel") && root.get("fpsCounterLabel").isJsonPrimitive()
+                && root.get("fpsCounterLabel").getAsJsonPrimitive().isBoolean()) {
+            fpsCounterLabel = root.get("fpsCounterLabel").getAsBoolean();
         }
         if (root.has("modBadges") && root.get("modBadges").isJsonPrimitive()) {
             modBadges = root.get("modBadges").getAsBoolean();

@@ -29,55 +29,56 @@ public final class GenHud {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null || client.options.hudHidden) return;
 
-        if (ClientConfig.dynamicIsland) drawIsland(context, client);
+        if (ClientConfig.dynamicIsland) {
+            drawClock(context, client);
+            drawIsland(context, client);
+        }
+        if (ClientConfig.fpsCounter) drawFpsCounter(context, client);
         if (ClientConfig.isEnabled("Target ESP")) drawTarget(context, client);
         if (ClientConfig.modBadges) drawCompanionBadges(context, client);
     }
 
+    private static void drawClock(DrawContext context, MinecraftClient client) {
+        String clock = LocalTime.now().format(CLOCK);
+        context.drawTextWithShadow(client.textRenderer, Text.literal(clock), 24, 14, 0xFFF2F2F5);
+    }
+
+    private static void drawFpsCounter(DrawContext context, MinecraftClient client) {
+        String value = ClientConfig.fpsCounterLabel
+                ? "FPS: " + client.getCurrentFps()
+                : client.getCurrentFps() + " FPS";
+        int x = 108;
+        context.drawTextWithShadow(client.textRenderer, Text.literal(value), x, 14, 0xFFE8EAF0);
+    }
+
     private static void drawIsland(DrawContext context, MinecraftClient client) {
         int screenWidth = client.getWindow().getScaledWidth();
-        int islandWidth = 380;
-        int x = screenWidth / 2 - islandWidth / 2;
+        int islandWidth = Math.min(450, Math.max(208, screenWidth - 190));
+        int x = screenWidth - islandWidth - 9;
         int y = 7;
         int accent = ClientConfig.accentColor();
         int islandHeight = 39;
+        boolean musicPlaying = client.getMusicTracker().isPlayingType(client.getMusicType());
 
         UiDraw.roundedFill(context, x - 3, y - 2, islandWidth + 6, islandHeight + 5, 20, 0x33000000);
         UiDraw.roundedPanel(context, x, y, islandWidth, islandHeight, 18, 0xF20A0C12, 0x805B606D);
         UiDraw.roundedFill(context, x + 17, y + 1, islandWidth - 34, 1, 1, 0x55FFFFFF);
-        UiDraw.roundedFill(context, x + 13, y + 7, 3, 25, 2, accent);
 
-        context.drawTextWithShadow(client.textRenderer, Text.literal("GEN"), x + 24, y + 8, 0xFFFFFFFF);
-        context.drawText(client.textRenderer, Text.literal("CLIENT"), x + 24, y + 20, 0xFF9097A5, false);
+        UiDraw.roundedPanel(context, x + 10, y + 7, 25, 25, 12, 0xFF25202E, 0x805B536B);
+        context.drawCenteredTextWithShadow(client.textRenderer, "G", x + 22, y + 15, accent);
 
-        String clock = LocalTime.now().format(CLOCK);
-        context.drawCenteredTextWithShadow(client.textRenderer, clock, x + 158, y + 8, 0xFFF2F2F5);
-        context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("LOCAL TIME"), x + 158, y + 21, 0xFF858D9B);
+        context.drawTextWithShadow(client.textRenderer, "GEN CLIENT", x + 48, y + 8, 0xFFF2F2F5);
+        String musicState = musicPlaying ? "MINECRAFT MUSIC PLAYING" : "MINECRAFT MUSIC IDLE";
+        context.drawText(client.textRenderer, Text.literal(musicState), x + 48, y + 21, 0xFF9BA2B0, false);
 
-        String fps = client.getCurrentFps() + " FPS";
-        context.drawTextWithShadow(client.textRenderer, Text.literal(fps), x + 220, y + 8, 0xFFE8EAF0);
-        var serverEntry = client.getCurrentServerEntry();
-        String lowerLabel = serverEntry == null ? "SINGLEPLAYER" : serverEntry.address.toUpperCase();
-        if (serverEntry != null && serverEntry.ping >= 0) lowerLabel += "  /  " + serverEntry.ping + " MS";
-        boolean truncated = client.textRenderer.getWidth(lowerLabel) > 95;
-        if (truncated) {
-            while (!lowerLabel.isEmpty() && client.textRenderer.getWidth(lowerLabel + "...") > 95) {
-                lowerLabel = lowerLabel.substring(0, lowerLabel.length() - 1);
-            }
-            lowerLabel += "...";
-        }
-        context.drawText(client.textRenderer, Text.literal(lowerLabel), x + 220, y + 21, 0xFF9BA2B0, false);
-
-        boolean musicPlaying = client.getMusicTracker().isPlayingType(client.getMusicType());
         int musicColor = musicPlaying ? accent : 0xFF858D9B;
-        context.drawCenteredTextWithShadow(client.textRenderer,
-                Text.literal(musicPlaying ? "♪ ON" : "♪ OFF"), x + 347, y + 8, musicColor);
-        context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("MUSIC"),
-                x + 347, y + 21, 0xFF858D9B);
-
-        context.fill(x + 116, y + 8, x + 117, y + 30, 0x2EFFFFFF);
-        context.fill(x + 207, y + 8, x + 208, y + 30, 0x2EFFFFFF);
-        context.fill(x + 316, y + 8, x + 317, y + 30, 0x2EFFFFFF);
+        long animation = System.currentTimeMillis() / 125L;
+        int barsX = x + islandWidth - 45;
+        for (int i = 0; i < 5; i++) {
+            int barHeight = musicPlaying ? 7 + Math.floorMod((int) animation + i * 3, 5) * 3 : 5 + (i % 2) * 2;
+            UiDraw.roundedFill(context, barsX + i * 7, y + (islandHeight - barHeight) / 2,
+                    4, barHeight, 2, musicColor);
+        }
     }
 
     private static void drawTarget(DrawContext context, MinecraftClient client) {

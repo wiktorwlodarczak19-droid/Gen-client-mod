@@ -63,6 +63,15 @@ public final class GenHubScreen extends GenScreen {
         }
 
         if (selectedModule != null) {
+            if ("FPS Counter".equals(selectedModule)) {
+                addDrawableChild(new GenButton(panelX + 24, panelY + panelHeight - 76, 206, 25,
+                        Text.literal(ClientConfig.fpsCounterLabel ? "FORMAT: FPS: 100" : "FORMAT: 100 FPS"),
+                        () -> {
+                            ClientConfig.fpsCounterLabel = !ClientConfig.fpsCounterLabel;
+                            ClientConfig.save();
+                            client.setScreen(new GenHubScreen(parent, section, selectedModule));
+                        }));
+            }
             addDrawableChild(new GenButton(panelX + 24, panelY + panelHeight - 43, 112, 25,
                     Text.literal("BACK"), () -> client.setScreen(new GenHubScreen(parent, section, null))));
             addDrawableChild(new GenButton(panelX + panelWidth - 154, panelY + panelHeight - 43, 130, 25,
@@ -102,7 +111,8 @@ public final class GenHubScreen extends GenScreen {
             case VISUAL -> VISUALS;
             case ADDONS -> ADDONS;
             case GENLAND -> List.of("Dynamic Island", "Sky Petals");
-            case MODS, PLUGS -> List.of();
+            case MODS -> List.of("FPS Counter");
+            case PLUGS -> List.of();
         };
     }
 
@@ -113,6 +123,7 @@ public final class GenHubScreen extends GenScreen {
     private static boolean enabled(String module) {
         return switch (module) {
             case "Dynamic Island" -> ClientConfig.dynamicIsland;
+            case "FPS Counter" -> ClientConfig.fpsCounter;
             case "Sky Petals" -> ClientConfig.sakuraPetals;
             default -> ClientConfig.isEnabled(module);
         };
@@ -122,6 +133,10 @@ public final class GenHubScreen extends GenScreen {
         switch (module) {
             case "Dynamic Island" -> {
                 ClientConfig.dynamicIsland = !ClientConfig.dynamicIsland;
+                ClientConfig.save();
+            }
+            case "FPS Counter" -> {
+                ClientConfig.fpsCounter = !ClientConfig.fpsCounter;
                 ClientConfig.save();
             }
             case "Sky Petals" -> {
@@ -150,7 +165,7 @@ public final class GenHubScreen extends GenScreen {
             String detail = switch (selectedModule) {
                 case "Custom Sky" -> "Sky rendering controls are being added here: sky tint, sun tint and celestial style.";
                 case "Spotify Lyrics" -> "Spotify playback and synchronized lyrics require a local Spotify connection. This panel is the setup entry point.";
-                case "FPS Counter" -> "Displays the live Minecraft FPS value.";
+                case "FPS Counter" -> "Displays the actual Minecraft frame rate beside the local clock. The value is never fabricated or increased.";
                 case "Dynamic Island" -> "Show or hide the top island with the local clock, real FPS and music information.";
                 case "Sky Petals" -> "Toggle the decorative sky particles.";
                 default -> "Enable or disable this cosmetic client-side effect.";
@@ -189,9 +204,14 @@ public final class GenHubScreen extends GenScreen {
             UiDraw.roundedPanel(context, listX, y, rowWidth - 112, 30, 8,
                     0xC90C1018, 0x504E5360);
             UiDraw.roundedFill(context, listX + 1, y + 6, 2, 18, 1, ClientConfig.accentColor());
-            context.drawTextWithShadow(textRenderer, module, listX + 12, y + 5, 0xFFF0F1F5);
-            context.drawText(textRenderer, "COSMETIC MODULE  /  CONFIGURABLE",
-                    listX + 12, y + 17, 0xFF858D9B, false);
+            UiDraw.roundedPanel(context, listX + 8, y + 4, 22, 22, 6, 0xD91A1D29, 0x805B606D);
+            String glyph = module.equals("FPS Counter") ? "F" : module.substring(0, 1);
+            context.drawCenteredTextWithShadow(textRenderer, glyph, listX + 19, y + 11, ClientConfig.accentColor());
+            context.drawTextWithShadow(textRenderer, module, listX + 38, y + 5, 0xFFF0F1F5);
+            context.drawText(textRenderer, section == Section.MODS
+                            ? "LIVE CLIENT METRIC  /  ACTUAL VALUE"
+                            : "COSMETIC MODULE  /  CONFIGURABLE",
+                    listX + 38, y + 17, 0xFF858D9B, false);
         }
 
         context.drawText(textRenderer, "Choose ON/OFF to toggle a module, or ⚙ to open its settings.",
