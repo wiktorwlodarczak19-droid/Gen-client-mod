@@ -73,13 +73,17 @@ public final class GenHubScreen extends GenScreen {
                         }));
             }
             if ("Dynamic Island".equals(selectedModule)) {
-                addDrawableChild(new GenButton(panelX + 24, panelY + panelHeight - 110, 236, 25,
+                int settingsGap = 8;
+                int settingsWidth = (panelWidth - 48 - settingsGap) / 2;
+                int settingsY = panelY + panelHeight - 110;
+                addDrawableChild(new GenButton(panelX + 24, settingsY, settingsWidth, 25,
                         Text.literal("ACCENT: " + ClientConfig.islandAccent),
                         () -> {
                             ClientConfig.cycleIslandAccent();
                             client.setScreen(new GenHubScreen(parent, section, selectedModule));
                         }));
-                addDrawableChild(new GenButton(panelX + 270, panelY + panelHeight - 110, 236, 25,
+                addDrawableChild(new GenButton(panelX + 24 + settingsWidth + settingsGap, settingsY,
+                        settingsWidth, 25,
                         Text.literal(ClientConfig.islandVisualizerAnimated
                                 ? "VISUALIZER: ANIMATED" : "VISUALIZER: STATIC"),
                         () -> {
