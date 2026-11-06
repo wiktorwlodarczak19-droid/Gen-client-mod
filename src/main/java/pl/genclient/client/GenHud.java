@@ -78,7 +78,7 @@ public final class GenHud {
         int progressX = x + 14, progressY = y + height - 4, progressWidth = islandWidth - 28;
         UiDraw.roundedFill(context, progressX, progressY, progressWidth, 2, 1, 0x665F596A);
         if (track.hasTrack() && track.durationMs() > 0) {
-            float progress = Math.max(0.0f, Math.min(1.0f, track.currentProgressMs() / (float) track.durationMs());
+            float progress = Math.max(0.0f, Math.min(1.0f, track.currentProgressMs() / (float) track.durationMs()));
             UiDraw.roundedFill(context, progressX, progressY, Math.max(2, (int) (progressWidth * progress)), 2, 1, accent);
         } else if (playing) {
             int pulse = 22 + (int) Math.floorMod(animation, 42);

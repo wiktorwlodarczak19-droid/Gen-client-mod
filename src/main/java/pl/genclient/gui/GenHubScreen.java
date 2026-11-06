@@ -2,7 +2,9 @@ package pl.genclient.gui;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
+import pl.genclient.client.SpotifyService;
 import pl.genclient.config.ClientConfig;
 
 import java.util.List;
@@ -63,6 +65,9 @@ public final class GenHubScreen extends GenScreen {
         }
 
         if (selectedModule != null) {
+            int settingsY = panelY + 208;
+            int settingsGap = 8;
+            int settingsWidth = (panelWidth - 48 - settingsGap) / 2;
             if ("FPS Counter".equals(selectedModule)) {
                 addDrawableChild(new GenButton(panelX + 24, panelY + panelHeight - 76, 206, 25,
                         Text.literal(ClientConfig.fpsCounterLabel ? "FORMAT: FPS: 100" : "FORMAT: 100 FPS"),
@@ -73,9 +78,7 @@ public final class GenHubScreen extends GenScreen {
                         }));
             }
             if ("Dynamic Island".equals(selectedModule)) {
-                int settingsGap = 8;
-                int settingsWidth = (panelWidth - 48 - settingsGap) / 2;
-                int settingsY = panelY + panelHeight - 110;
+                settingsY = panelY + 208;
                 addDrawableChild(new GenButton(panelX + 24, settingsY, settingsWidth, 25,
                         Text.literal("ACCENT: " + ClientConfig.islandAccent),
                         () -> {
@@ -92,12 +95,57 @@ public final class GenHubScreen extends GenScreen {
                             client.setScreen(new GenHubScreen(parent, section, selectedModule));
                         }));
             }
+            if ("Custom Sky".equals(selectedModule)) {
+                addDrawableChild(new GenButton(panelX + 24, settingsY, settingsWidth, 27,
+                        Text.literal("SKY TINT: " + ClientConfig.skyTint),
+                        () -> { ClientConfig.cycleSkyTint(); refreshSettings(); }));
+                addDrawableChild(new GenButton(panelX + 24 + settingsWidth + settingsGap, settingsY, settingsWidth, 27,
+                        Text.literal("STRENGTH: " + ClientConfig.skyTintStrength + "%"),
+                        () -> { ClientConfig.adjustSkyTintStrength(10); refreshSettings(); }));
+                addDrawableChild(new GenButton(panelX + 24, settingsY + 35, settingsWidth, 27,
+                        Text.literal("STRENGTH - 10%"),
+                        () -> { ClientConfig.adjustSkyTintStrength(-10); refreshSettings(); }));
+            } else if (VISUALS.contains(selectedModule) || "Sky Petals".equals(selectedModule)) {
+                addDrawableChild(new GenButton(panelX + 24, settingsY, settingsWidth, 27,
+                        Text.literal("COLOR: " + ClientConfig.effectColorName(selectedModule)),
+                        () -> { ClientConfig.cycleEffectColor(selectedModule); refreshSettings(); }));
+                addDrawableChild(new GenButton(panelX + 24 + settingsWidth + settingsGap, settingsY, settingsWidth, 27,
+                        Text.literal("INTENSITY: " + ClientConfig.effectIntensity(selectedModule)),
+                        () -> { ClientConfig.cycleEffectIntensity(selectedModule); refreshSettings(); }));
+            }
+            if ("Low FX Mode".equals(selectedModule)) {
+                addDrawableChild(new GenButton(panelX + 24, settingsY, settingsWidth, 27,
+                        Text.literal(ClientConfig.lowFxMode ? "LOW FX: ON" : "LOW FX: OFF"),
+                        () -> { ClientConfig.lowFxMode = !ClientConfig.lowFxMode; ClientConfig.save(); refreshSettings(); }));
+            }
+            if ("Island Text".equals(selectedModule)) {
+                TextFieldWidget field = new TextFieldWidget(textRenderer, panelX + 24, settingsY,
+                        panelWidth - 48, 26, Text.literal("Island text"));
+                field.setMaxLength(90);
+                field.setText(ClientConfig.islandMessage);
+                field.setPlaceholder(Text.literal("Wpisz własną linijkę tekstu…"));
+                addDrawableChild(field);
+                addDrawableChild(new GenButton(panelX + 24, settingsY + 35, settingsWidth, 27,
+                        Text.literal("SAVE TEXT"), () -> {
+                            ClientConfig.setIslandMessage(field.getText());
+                            ClientConfig.islandMessageEnabled = !ClientConfig.islandMessage.isBlank();
+                            ClientConfig.save();
+                            refreshSettings();
+                        }, true));
+                addDrawableChild(new GenButton(panelX + 24 + settingsWidth + settingsGap, settingsY + 35, settingsWidth, 27,
+                        Text.literal(ClientConfig.islandMessageEnabled ? "TEXT: ON" : "TEXT: OFF"),
+                        () -> { ClientConfig.islandMessageEnabled = !ClientConfig.islandMessageEnabled; ClientConfig.save(); refreshSettings(); }));
+            }
+            if ("Spotify Player".equals(selectedModule)) {
+                addDrawableChild(new GenButton(panelX + 24, settingsY, settingsWidth, 27,
+                        Text.literal("OPEN SPOTIFY SETUP"), () -> client.setScreen(new SpotifyScreen(this)), true));
+            }
             addDrawableChild(new GenButton(panelX + 24, panelY + panelHeight - 43, 112, 25,
                     Text.literal("BACK"), () -> client.setScreen(new GenHubScreen(parent, section, null))));
             addDrawableChild(new GenButton(panelX + panelWidth - 154, panelY + panelHeight - 43, 130, 25,
                     moduleState(selectedModule), () -> {
-                        toggle(selectedModule);
-                        client.setScreen(new GenHubScreen(parent, section, selectedModule));
+                        if ("Spotify Player".equals(selectedModule)) client.setScreen(new SpotifyScreen(this));
+                        else { toggle(selectedModule); refreshSettings(); }
                     }));
             return;
         }
@@ -105,22 +153,29 @@ public final class GenHubScreen extends GenScreen {
         listX = panelX + 24;
         listY = panelY + 112;
         rowWidth = panelWidth - 48;
-        rowGap = 43;
+        int gridGap = 10;
+        int cardWidth = (rowWidth - gridGap) / 2;
+        rowGap = 50;
 
         List<String> modules = modulesFor(section);
         for (int i = 0; i < modules.size(); i++) {
             String module = modules.get(i);
-            int y = listY + i * rowGap;
-            if (y + 30 > panelY + panelHeight - 55) break;
-
-            addDrawableChild(new GenButton(listX + rowWidth - 102, y, 74, 28,
+            int col = i % 2;
+            int row = i / 2;
+            int x = listX + col * (cardWidth + gridGap);
+            int y = listY + row * rowGap;
+            if (y + 42 > panelY + panelHeight - 55) break;
+            addDrawableChild(new GenButton(x + cardWidth - 90, y + 7, 54, 27,
                     Text.literal(enabled(module) ? "ON" : "OFF"), () -> {
-                        toggle(module);
-                        client.setScreen(new GenHubScreen(parent, section, null));
+                        if ("Spotify Player".equals(module) && !SpotifyService.isConnected())
+                            client.setScreen(new SpotifyScreen(this));
+                        else { toggle(module); refreshList(); }
                     }));
-            addDrawableChild(new GenButton(listX + rowWidth - 24, y, 24, 28,
-                    Text.literal("⚙"), () -> client.setScreen(
-                            new GenHubScreen(parent, section, module))));
+            addDrawableChild(new GenButton(x + cardWidth - 31, y + 7, 27, 27,
+                    Text.literal("⚙"), () -> {
+                        if ("Spotify Player".equals(module)) client.setScreen(new SpotifyScreen(this));
+                        else client.setScreen(new GenHubScreen(parent, section, module));
+                    }));
         }
         addDrawableChild(new GenButton(panelX + panelWidth - 154, panelY + panelHeight - 43, 130, 25,
                 Text.literal("CLOSE"), this::close));
@@ -129,10 +184,10 @@ public final class GenHubScreen extends GenScreen {
     private static List<String> modulesFor(Section section) {
         return switch (section) {
             case VISUAL -> VISUALS;
-            case ADDONS -> ADDONS;
+            case ADDONS -> List.of("Kill Effect", "Hit Sparks", "Companion Badges");
             case GENLAND -> List.of("Dynamic Island", "Sky Petals");
-            case MODS -> List.of("FPS Counter");
-            case PLUGS -> List.of();
+            case MODS -> List.of("FPS Counter", "Low FX Mode");
+            case PLUGS -> List.of("Spotify Player", "Island Text");
         };
     }
 
@@ -144,7 +199,11 @@ public final class GenHubScreen extends GenScreen {
         return switch (module) {
             case "Dynamic Island" -> ClientConfig.dynamicIsland;
             case "FPS Counter" -> ClientConfig.fpsCounter;
+            case "Low FX Mode" -> ClientConfig.lowFxMode;
             case "Sky Petals" -> ClientConfig.sakuraPetals;
+            case "Spotify Player" -> SpotifyService.isConnected();
+            case "Island Text" -> ClientConfig.islandMessageEnabled;
+            case "Companion Badges" -> ClientConfig.modBadges;
             default -> ClientConfig.isEnabled(module);
         };
     }
@@ -163,12 +222,22 @@ public final class GenHubScreen extends GenScreen {
                 ClientConfig.sakuraPetals = !ClientConfig.sakuraPetals;
                 ClientConfig.save();
             }
+            case "Low FX Mode" -> { ClientConfig.lowFxMode = !ClientConfig.lowFxMode; ClientConfig.save(); }
+            case "Island Text" -> { ClientConfig.islandMessageEnabled = !ClientConfig.islandMessageEnabled; ClientConfig.save(); }
+            case "Companion Badges" -> { ClientConfig.modBadges = !ClientConfig.modBadges; ClientConfig.save(); }
+            case "Spotify Player" -> SpotifyService.disconnect();
             default -> ClientConfig.toggle(module);
         }
     }
 
     private static Text moduleState(String module) {
         return Text.literal((enabled(module) ? "●  ON" : "○  OFF"));
+    }
+    private void refreshSettings() {
+        if (client != null) client.setScreen(new GenHubScreen(parent, section, selectedModule));
+    }
+    private void refreshList() {
+        if (client != null) client.setScreen(new GenHubScreen(parent, section, null));
     }
 
     @Override
@@ -183,10 +252,14 @@ public final class GenHubScreen extends GenScreen {
                     "Module preferences are stored locally and survive restarts.",
                     panelX + 24, panelY + 112);
             String detail = switch (selectedModule) {
-                case "Custom Sky" -> "Sky rendering controls are being added here: sky tint, sun tint and celestial style.";
+                case "Custom Sky" -> "Actual world sky tint with a selectable colour palette and blend strength.";
                 case "Spotify Lyrics" -> "Spotify playback and synchronized lyrics require a local Spotify connection. This panel is the setup entry point.";
                 case "FPS Counter" -> "Displays the actual Minecraft frame rate beside the local clock. The value is never fabricated or increased.";
-                case "Dynamic Island" -> "Personalize the island accent and choose an animated or static music visualizer.";
+                case "Low FX Mode" -> "Reduces GEN CLIENT particle counts instead of inventing FPS.";
+                case "Spotify Player" -> "Official Spotify OAuth PKCE: title, artist, progress and playback controls.";
+                case "Island Text" -> "Manual capsule text. It is not automatically synchronized with music.";
+                case "Companion Badges" -> "Badges for detected Flashback and Mod Menu integrations.";
+                case "Dynamic Island" -> "Clock and FPS at the left, rounded media capsule with current track metadata at the right.";
                 case "Sky Petals" -> "Toggle the decorative sky particles.";
                 default -> "Enable or disable this cosmetic client-side effect.";
             };
@@ -199,24 +272,6 @@ public final class GenHubScreen extends GenScreen {
         }
 
         List<String> modules = modulesFor(section);
-        if (section == Section.PLUGS) {
-            context.drawTextWithShadow(textRenderer, "PLUGINS & INTEGRATIONS",
-                    listX, listY - 1, 0xFFFFFFFF);
-            context.drawText(textRenderer, "Spotify Lyrics  /  planned connection",
-                    listX, listY + 27, 0xFFB9C0CC, false);
-            context.drawText(textRenderer, "Live song title, artist and synchronized lyrics will appear in Dynamic Island.",
-                    listX, listY + 43, 0xFF8E97A7, false);
-            return;
-        }
-
-        if (section == Section.MODS) {
-            context.drawTextWithShadow(textRenderer, "CLIENT MODS",
-                    listX, listY - 1, 0xFFFFFFFF);
-            context.drawText(textRenderer, "FPS Counter is already shown by the island. More performance tools will be added only when they make measurable changes.",
-                    listX, listY + 28, 0xFFB9C0CC, false);
-            return;
-        }
-
         for (int i = 0; i < modules.size(); i++) {
             String module = modules.get(i);
             int y = listY + i * rowGap;
