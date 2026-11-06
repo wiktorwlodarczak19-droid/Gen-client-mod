@@ -56,7 +56,7 @@ public final class GenHud {
         int islandWidth = Math.min(450, Math.max(208, screenWidth - 190));
         int x = screenWidth - islandWidth - 9;
         int y = 7;
-        int accent = ClientConfig.accentColor();
+        int accent = ClientConfig.islandAccentColor();
         int islandHeight = 39;
         boolean musicPlaying = client.getMusicTracker().isPlayingType(client.getMusicType());
 
@@ -75,7 +75,9 @@ public final class GenHud {
         long animation = System.currentTimeMillis() / 125L;
         int barsX = x + islandWidth - 45;
         for (int i = 0; i < 5; i++) {
-            int barHeight = musicPlaying ? 7 + Math.floorMod((int) animation + i * 3, 5) * 3 : 5 + (i % 2) * 2;
+            int barHeight = ClientConfig.islandVisualizerAnimated && musicPlaying
+                    ? 7 + Math.floorMod((int) animation + i * 3, 5) * 3
+                    : 8;
             UiDraw.roundedFill(context, barsX + i * 7, y + (islandHeight - barHeight) / 2,
                     4, barHeight, 2, musicColor);
         }

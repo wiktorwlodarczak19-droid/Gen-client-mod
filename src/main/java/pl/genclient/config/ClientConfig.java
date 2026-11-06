@@ -32,6 +32,8 @@ public final class ClientConfig {
     public static boolean fpsCounter = true;
     public static boolean fpsCounterLabel = false;
     public static boolean modBadges = true;
+    public static String islandAccent = "GLOBAL";
+    public static boolean islandVisualizerAnimated = true;
 
     static {
         MODULES.put("Jump Circle", true);
@@ -95,6 +97,37 @@ public final class ClientConfig {
             case "LAVENDER" -> 0xFFC4B5FD;
             case "MINT" -> 0xFF9BE8C5;
             default -> 0xFFF4BFD3;
+        };
+    }
+
+    /** Accent used only by the Dynamic Island; GLOBAL follows the client-wide theme. */
+    public static int islandAccentColor() {
+        return switch (islandAccent) {
+            case "SAKURA" -> 0xFFF4BFD3;
+            case "PEARL" -> 0xFFFFFFFF;
+            case "ICE" -> 0xFF9ECbFF;
+            case "LAVENDER" -> 0xFFC4B5FD;
+            case "MINT" -> 0xFF9BE8C5;
+            default -> accentColor();
+        };
+    }
+
+    public static void cycleIslandAccent() {
+        islandAccent = switch (islandAccent) {
+            case "GLOBAL" -> "SAKURA";
+            case "SAKURA" -> "PEARL";
+            case "PEARL" -> "ICE";
+            case "ICE" -> "LAVENDER";
+            case "LAVENDER" -> "MINT";
+            default -> "GLOBAL";
+        };
+        save();
+    }
+
+    private static String safeIslandAccent(String value) {
+        return switch (value) {
+            case "GLOBAL", "SAKURA", "PEARL", "ICE", "LAVENDER", "MINT" -> value;
+            default -> "GLOBAL";
         };
     }
 
@@ -181,6 +214,8 @@ public final class ClientConfig {
         root.addProperty("fpsCounter", fpsCounter);
         root.addProperty("fpsCounterLabel", fpsCounterLabel);
         root.addProperty("modBadges", modBadges);
+        root.addProperty("islandAccent", islandAccent);
+        root.addProperty("islandVisualizerAnimated", islandVisualizerAnimated);
 
         JsonObject playtime = new JsonObject();
         PLAYTIME.forEach(playtime::addProperty);
@@ -235,6 +270,13 @@ public final class ClientConfig {
         if (root.has("fpsCounterLabel") && root.get("fpsCounterLabel").isJsonPrimitive()
                 && root.get("fpsCounterLabel").getAsJsonPrimitive().isBoolean()) {
             fpsCounterLabel = root.get("fpsCounterLabel").getAsBoolean();
+        }
+        if (root.has("islandAccent") && root.get("islandAccent").isJsonPrimitive()) {
+            islandAccent = safeIslandAccent(root.get("islandAccent").getAsString());
+        }
+        if (root.has("islandVisualizerAnimated") && root.get("islandVisualizerAnimated").isJsonPrimitive()
+                && root.get("islandVisualizerAnimated").getAsJsonPrimitive().isBoolean()) {
+            islandVisualizerAnimated = root.get("islandVisualizerAnimated").getAsBoolean();
         }
         if (root.has("modBadges") && root.get("modBadges").isJsonPrimitive()) {
             modBadges = root.get("modBadges").getAsBoolean();

@@ -72,6 +72,22 @@ public final class GenHubScreen extends GenScreen {
                             client.setScreen(new GenHubScreen(parent, section, selectedModule));
                         }));
             }
+            if ("Dynamic Island".equals(selectedModule)) {
+                addDrawableChild(new GenButton(panelX + 24, panelY + panelHeight - 110, 236, 25,
+                        Text.literal("ACCENT: " + ClientConfig.islandAccent),
+                        () -> {
+                            ClientConfig.cycleIslandAccent();
+                            client.setScreen(new GenHubScreen(parent, section, selectedModule));
+                        }));
+                addDrawableChild(new GenButton(panelX + 270, panelY + panelHeight - 110, 236, 25,
+                        Text.literal(ClientConfig.islandVisualizerAnimated
+                                ? "VISUALIZER: ANIMATED" : "VISUALIZER: STATIC"),
+                        () -> {
+                            ClientConfig.islandVisualizerAnimated = !ClientConfig.islandVisualizerAnimated;
+                            ClientConfig.save();
+                            client.setScreen(new GenHubScreen(parent, section, selectedModule));
+                        }));
+            }
             addDrawableChild(new GenButton(panelX + 24, panelY + panelHeight - 43, 112, 25,
                     Text.literal("BACK"), () -> client.setScreen(new GenHubScreen(parent, section, null))));
             addDrawableChild(new GenButton(panelX + panelWidth - 154, panelY + panelHeight - 43, 130, 25,
@@ -166,7 +182,7 @@ public final class GenHubScreen extends GenScreen {
                 case "Custom Sky" -> "Sky rendering controls are being added here: sky tint, sun tint and celestial style.";
                 case "Spotify Lyrics" -> "Spotify playback and synchronized lyrics require a local Spotify connection. This panel is the setup entry point.";
                 case "FPS Counter" -> "Displays the actual Minecraft frame rate beside the local clock. The value is never fabricated or increased.";
-                case "Dynamic Island" -> "Show or hide the top island with the local clock, real FPS and music information.";
+                case "Dynamic Island" -> "Personalize the island accent and choose an animated or static music visualizer.";
                 case "Sky Petals" -> "Toggle the decorative sky particles.";
                 default -> "Enable or disable this cosmetic client-side effect.";
             };

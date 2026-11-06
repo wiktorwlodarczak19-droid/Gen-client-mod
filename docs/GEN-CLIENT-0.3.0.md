@@ -7,6 +7,7 @@ This branch begins the next UI iteration for Minecraft Fabric 1.21.1.
 - Main sections: Mods, Visual, GenLand, Addons and Plugs.
 - Visual module rows with ON/OFF controls and separate settings entry points.
 - GenLand controls for the existing Dynamic Island HUD and Sakura sky petals.
+- Dynamic Island has its own persisted accent palette (or follows the global theme) and an animated/static music visualizer setting.
 - Existing visual modules remain connected to the saved client configuration.
 - Build workflow runs for pushes to this feature branch and checks that the new screen is packaged.
 
