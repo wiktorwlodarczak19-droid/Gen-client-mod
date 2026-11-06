@@ -27,7 +27,11 @@ public final class GenClient implements ClientModInitializer {
 
         GenHud.register();
         VisualEffects.register();
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> ClientConfig.save());
+        SpotifyService.initialize();
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+            ClientConfig.save();
+            SpotifyService.shutdown();
+        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             VisualEffects.tick(client);

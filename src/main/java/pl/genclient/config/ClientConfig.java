@@ -24,6 +24,8 @@ public final class ClientConfig {
     private static final Path IMPORT_FILE = CONFIG_DIR.resolve("genclient-import.json");
     private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
     private static final Map<String, Long> PLAYTIME = new LinkedHashMap<>();
+    private static final Map<String, String> EFFECT_COLORS = new LinkedHashMap<>();
+    private static final Map<String, Integer> EFFECT_INTENSITIES = new LinkedHashMap<>();
 
     public static String accent = "SAKURA";
     public static String wallpaper = "sakura_dark";
@@ -34,6 +36,11 @@ public final class ClientConfig {
     public static boolean modBadges = true;
     public static String islandAccent = "GLOBAL";
     public static boolean islandVisualizerAnimated = true;
+    public static String islandMessage = "";
+    public static boolean islandMessageEnabled = false;
+    public static boolean lowFxMode = false;
+    public static String skyTint = "LAVENDER";
+    public static int skyTintStrength = 60;
 
     static {
         MODULES.put("Jump Circle", true);
@@ -45,6 +52,17 @@ public final class ClientConfig {
         MODULES.put("Glint Hand", false);
         MODULES.put("Aura Glint Light 3D", false);
         MODULES.put("Armor Glass Light 3D", false);
+        EFFECT_COLORS.put("Jump Circle", "SAKURA");
+        EFFECT_COLORS.put("Glass Vapor", "ICE");
+        EFFECT_COLORS.put("Target ESP", "MINT");
+        EFFECT_COLORS.put("Hit Sparks", "GOLD");
+        EFFECT_COLORS.put("Kill Effect", "SAKURA");
+        EFFECT_COLORS.put("Custom Sky", "LAVENDER");
+        EFFECT_COLORS.put("Glint Hand", "LAVENDER");
+        EFFECT_COLORS.put("Aura Glint Light 3D", "LAVENDER");
+        EFFECT_COLORS.put("Armor Glass Light 3D", "ICE");
+        EFFECT_COLORS.put("Sky Petals", "SAKURA");
+        for (String module : EFFECT_COLORS.keySet()) EFFECT_INTENSITIES.put(module, 2);
         load();
     }
 
@@ -122,6 +140,59 @@ public final class ClientConfig {
             default -> "GLOBAL";
         };
         save();
+    }
+
+    public static String effectColorName(String module) { return EFFECT_COLORS.getOrDefault(module, "SAKURA"); }
+    public static int effectColor(String module) { return paletteColor(effectColorName(module)); }
+    public static void cycleEffectColor(String module) {
+        if (!EFFECT_COLORS.containsKey(module)) return;
+        EFFECT_COLORS.put(module, nextPalette(EFFECT_COLORS.get(module)));
+        save();
+    }
+    public static int effectIntensity(String module) { return EFFECT_INTENSITIES.getOrDefault(module, 2); }
+    public static void cycleEffectIntensity(String module) {
+        if (!EFFECT_INTENSITIES.containsKey(module)) return;
+        EFFECT_INTENSITIES.put(module, effectIntensity(module) % 3 + 1);
+        save();
+    }
+    public static int skyTintColor() { return paletteColor(skyTint); }
+    public static float skyTintAmount() { return Math.max(0.20f, Math.min(1.0f, skyTintStrength / 100.0f)); }
+    public static void cycleSkyTint() { skyTint = nextPalette(skyTint); save(); }
+    public static void adjustSkyTintStrength(int amount) {
+        skyTintStrength = Math.max(20, Math.min(100, skyTintStrength + amount));
+        save();
+    }
+    public static void setIslandMessage(String value) {
+        islandMessage = value == null ? "" : value.replace('\n', ' ').replace('\r', ' ').trim();
+        if (islandMessage.length() > 90) islandMessage = islandMessage.substring(0, 90);
+        save();
+    }
+    private static String nextPalette(String value) {
+        return switch (value) {
+            case "SAKURA" -> "ICE";
+            case "ICE" -> "LAVENDER";
+            case "LAVENDER" -> "MINT";
+            case "MINT" -> "GOLD";
+            case "GOLD" -> "PEARL";
+            case "PEARL" -> "SAKURA";
+            default -> "SAKURA";
+        };
+    }
+    private static int paletteColor(String value) {
+        return switch (value) {
+            case "PEARL" -> 0xFFFFFFFF;
+            case "ICE" -> 0xFF9ECBFF;
+            case "LAVENDER" -> 0xFFC4B5FD;
+            case "MINT" -> 0xFF9BE8C5;
+            case "GOLD" -> 0xFFF5C76E;
+            default -> 0xFFF4BFD3;
+        };
+    }
+    private static String safePalette(String value) {
+        return switch (value) {
+            case "SAKURA", "PEARL", "ICE", "LAVENDER", "MINT", "GOLD" -> value;
+            default -> "SAKURA";
+        };
     }
 
     private static String safeIslandAccent(String value) {
@@ -216,6 +287,17 @@ public final class ClientConfig {
         root.addProperty("modBadges", modBadges);
         root.addProperty("islandAccent", islandAccent);
         root.addProperty("islandVisualizerAnimated", islandVisualizerAnimated);
+        root.addProperty("islandMessage", islandMessage);
+        root.addProperty("islandMessageEnabled", islandMessageEnabled);
+        root.addProperty("lowFxMode", lowFxMode);
+        root.addProperty("skyTint", skyTint);
+        root.addProperty("skyTintStrength", skyTintStrength);
+        JsonObject effectColors = new JsonObject();
+        EFFECT_COLORS.forEach(effectColors::addProperty);
+        root.add("effectColors", effectColors);
+        JsonObject effectIntensities = new JsonObject();
+        EFFECT_INTENSITIES.forEach(effectIntensities::addProperty);
+        root.add("effectIntensities", effectIntensities);
 
         JsonObject playtime = new JsonObject();
         PLAYTIME.forEach(playtime::addProperty);
@@ -277,6 +359,41 @@ public final class ClientConfig {
         if (root.has("islandVisualizerAnimated") && root.get("islandVisualizerAnimated").isJsonPrimitive()
                 && root.get("islandVisualizerAnimated").getAsJsonPrimitive().isBoolean()) {
             islandVisualizerAnimated = root.get("islandVisualizerAnimated").getAsBoolean();
+        }
+        if (root.has("islandMessage") && root.get("islandMessage").isJsonPrimitive()) {
+            islandMessage = root.get("islandMessage").getAsString();
+            if (islandMessage.length() > 90) islandMessage = islandMessage.substring(0, 90);
+        }
+        if (root.has("islandMessageEnabled") && root.get("islandMessageEnabled").isJsonPrimitive()
+                && root.get("islandMessageEnabled").getAsJsonPrimitive().isBoolean()) {
+            islandMessageEnabled = root.get("islandMessageEnabled").getAsBoolean();
+        }
+        if (root.has("lowFxMode") && root.get("lowFxMode").isJsonPrimitive()
+                && root.get("lowFxMode").getAsJsonPrimitive().isBoolean()) {
+            lowFxMode = root.get("lowFxMode").getAsBoolean();
+        }
+        if (root.has("skyTint") && root.get("skyTint").isJsonPrimitive()) {
+            skyTint = safePalette(root.get("skyTint").getAsString());
+        }
+        if (root.has("skyTintStrength") && root.get("skyTintStrength").isJsonPrimitive()
+                && root.get("skyTintStrength").getAsJsonPrimitive().isNumber()) {
+            skyTintStrength = Math.max(20, Math.min(100, root.get("skyTintStrength").getAsInt()));
+        }
+        if (root.has("effectColors") && root.get("effectColors").isJsonObject()) {
+            JsonObject saved = root.getAsJsonObject("effectColors");
+            for (Map.Entry<String, String> entry : EFFECT_COLORS.entrySet()) {
+                JsonElement value = saved.get(entry.getKey());
+                if (value != null && value.isJsonPrimitive()) entry.setValue(safePalette(value.getAsString()));
+            }
+        }
+        if (root.has("effectIntensities") && root.get("effectIntensities").isJsonObject()) {
+            JsonObject saved = root.getAsJsonObject("effectIntensities");
+            for (Map.Entry<String, Integer> entry : EFFECT_INTENSITIES.entrySet()) {
+                JsonElement value = saved.get(entry.getKey());
+                if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+                    entry.setValue(Math.max(1, Math.min(3, value.getAsInt())));
+                }
+            }
         }
         if (root.has("modBadges") && root.get("modBadges").isJsonPrimitive()) {
             modBadges = root.get("modBadges").getAsBoolean();
