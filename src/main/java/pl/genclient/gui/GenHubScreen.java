@@ -67,7 +67,7 @@ public final class GenHubScreen extends GenScreen {
                     Text.literal("BACK"), () -> client.setScreen(new GenHubScreen(parent, section, null))));
             addDrawableChild(new GenButton(panelX + panelWidth - 154, panelY + panelHeight - 43, 130, 25,
                     moduleState(selectedModule), () -> {
-                        ClientConfig.toggle(selectedModule);
+                        toggle(selectedModule);
                         client.setScreen(new GenHubScreen(parent, section, selectedModule));
                     }));
             return;
@@ -85,8 +85,8 @@ public final class GenHubScreen extends GenScreen {
             if (y + 30 > panelY + panelHeight - 55) break;
 
             addDrawableChild(new GenButton(listX + rowWidth - 102, y, 74, 28,
-                    Text.literal(ClientConfig.isEnabled(module) ? "ON" : "OFF"), () -> {
-                        ClientConfig.toggle(module);
+                    Text.literal(enabled(module) ? "ON" : "OFF"), () -> {
+                        toggle(module);
                         client.setScreen(new GenHubScreen(parent, section, null));
                     }));
             addDrawableChild(new GenButton(listX + rowWidth - 24, y, 24, 28,
@@ -102,8 +102,7 @@ public final class GenHubScreen extends GenScreen {
             case VISUAL -> VISUALS;
             case ADDONS -> ADDONS;
             case GENLAND -> List.of("Dynamic Island", "Sky Petals");
-            case MODS -> List.of("FPS Counter");
-            case PLUGS -> List.of("Spotify Lyrics");
+            case MODS, PLUGS -> List.of();
         };
     }
 
@@ -151,7 +150,7 @@ public final class GenHubScreen extends GenScreen {
             String detail = switch (selectedModule) {
                 case "Custom Sky" -> "Sky rendering controls are being added here: sky tint, sun tint and celestial style.";
                 case "Spotify Lyrics" -> "Spotify playback and synchronized lyrics require a local Spotify connection. This panel is the setup entry point.";
-                case "FPS Counter" -> "Displays the real Minecraft FPS value. GEN CLIENT will never substitute a fake FPS number.";
+                case "FPS Counter" -> "Displays the live Minecraft FPS value.";
                 case "Dynamic Island" -> "Show or hide the top island with the local clock, real FPS and music information.";
                 case "Sky Petals" -> "Toggle the decorative sky particles.";
                 default -> "Enable or disable this cosmetic client-side effect.";
