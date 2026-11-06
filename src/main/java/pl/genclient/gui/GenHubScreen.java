@@ -253,7 +253,7 @@ public final class GenHubScreen extends GenScreen {
                     panelX + 24, panelY + 112);
             String detail = switch (selectedModule) {
                 case "Custom Sky" -> "Actual world sky tint with a selectable colour palette and blend strength.";
-                case "Spotify Lyrics" -> "Spotify playback and synchronized lyrics require a local Spotify connection. This panel is the setup entry point.";
+                case "Spotify Player" -> "Official Spotify OAuth PKCE: title, artist, playback progress and playback controls.";
                 case "FPS Counter" -> "Displays the actual Minecraft frame rate beside the local clock. The value is never fabricated or increased.";
                 case "Low FX Mode" -> "Reduces GEN CLIENT particle counts instead of inventing FPS.";
                 case "Spotify Player" -> "Official Spotify OAuth PKCE: title, artist, progress and playback controls.";
@@ -272,25 +272,45 @@ public final class GenHubScreen extends GenScreen {
         }
 
         List<String> modules = modulesFor(section);
+        int gridGap = 10;
+        int cardWidth = (rowWidth - gridGap) / 2;
+        int cardHeight = 42;
         for (int i = 0; i < modules.size(); i++) {
             String module = modules.get(i);
-            int y = listY + i * rowGap;
-            if (y + 30 > panelY + panelHeight - 55) break;
-            UiDraw.roundedPanel(context, listX, y, rowWidth - 112, 30, 8,
-                    0xC90C1018, 0x504E5360);
-            UiDraw.roundedFill(context, listX + 1, y + 6, 2, 18, 1, ClientConfig.accentColor());
-            UiDraw.roundedPanel(context, listX + 8, y + 4, 22, 22, 6, 0xD91A1D29, 0x805B606D);
-            String glyph = module.equals("FPS Counter") ? "F" : module.substring(0, 1);
-            context.drawCenteredTextWithShadow(textRenderer, glyph, listX + 19, y + 11, ClientConfig.accentColor());
-            context.drawTextWithShadow(textRenderer, module, listX + 38, y + 5, 0xFFF0F1F5);
-            context.drawText(textRenderer, section == Section.MODS
-                            ? "LIVE CLIENT METRIC  /  ACTUAL VALUE"
-                            : "COSMETIC MODULE  /  CONFIGURABLE",
-                    listX + 38, y + 17, 0xFF858D9B, false);
+            int col = i % 2;
+            int row = i / 2;
+            int x = listX + col * (cardWidth + gridGap);
+            int y = listY + row * rowGap;
+            if (y + cardHeight > panelY + panelHeight - 55) break;
+
+            UiDraw.roundedPanel(context, x, y, cardWidth, cardHeight, 9,
+                    0xC90C1018, 0x604E5360);
+            UiDraw.roundedFill(context, x + 1, y + 7, 2, 28, 1, ClientConfig.accentColor());
+            UiDraw.roundedPanel(context, x + 9, y + 9, 24, 24, 7,
+                    0xD91A1D29, 0x805B606D);
+            String glyph = module.equals("FPS Counter") ? "F"
+                    : module.equals("Spotify Player") ? "♪"
+                    : module.substring(0, 1);
+            context.drawCenteredTextWithShadow(textRenderer, glyph, x + 21, y + 17,
+                    ClientConfig.accentColor());
+            int labelWidth = Math.max(32, cardWidth - 150);
+            context.drawTextWithShadow(textRenderer,
+                    textRenderer.trimToWidth(module, labelWidth),
+                    x + 42, y + 7, 0xFFF0F1F5);
+            String status = enabled(module) ? "ENABLED" : "DISABLED";
+            context.drawText(textRenderer, status, x + 42, y + 22,
+                    enabled(module) ? 0xFFB9C7C2 : 0xFF858D9B, false);
         }
 
-        context.drawText(textRenderer, "Choose ON/OFF to toggle a module, or ⚙ to open its settings.",
-                panelX + 24, panelY + panelHeight - 27, 0xFF858D9B, false);
+        String hint = switch (section) {
+            case MODS -> "MODS  /  Prawdziwy licznik FPS i ograniczanie kosztu efektów.";
+            case VISUAL -> "VISUAL  /  ON/OFF włącza efekt, zębatka otwiera osobne ustawienia.";
+            case GENLAND -> "GENLAND  /  Personalizacja Dynamic Island i atmosfery.";
+            case ADDONS -> "ADDONS  /  Dodatkowe efekty i odznaki.";
+            case PLUGS -> "PLUGS  /  Spotify oraz własny tekst kapsuły.";
+        };
+        context.drawText(textRenderer, hint, panelX + 24, panelY + panelHeight - 27,
+                0xFF858D9B, false);
     }
 
     @Override

@@ -29,14 +29,17 @@ jobs:
           test -f src/main/java/pl/genclient/client/GenClient.java
           test -f src/main/java/pl/genclient/client/GenHud.java
           test -f src/main/java/pl/genclient/client/VisualEffects.java
+          test -f src/main/java/pl/genclient/client/SpotifyService.java
           test -f src/main/java/pl/genclient/config/ClientConfig.java
           test -f src/main/java/pl/genclient/gui/GenMainMenuScreen.java
           test -f src/main/java/pl/genclient/gui/GenPauseMenuScreen.java
           test -f src/main/java/pl/genclient/gui/VisualsScreen.java
           test -f src/main/java/pl/genclient/gui/GenHubScreen.java
+          test -f src/main/java/pl/genclient/gui/SpotifyScreen.java
           test -f src/main/java/pl/genclient/gui/StyleScreen.java
           test -f src/main/resources/fabric.mod.json
           test -f src/main/resources/genclient.mixins.json
+          test -f src/main/java/pl/genclient/mixin/ClientWorldMixin.java
           test -f src/main/resources/assets/genclient/textures/gui/logo_mark.png
           test -f src/main/resources/assets/genclient/textures/gui/logo_text.png
           test -f src/main/resources/assets/genclient/textures/gui/wallpapers/sakura_dark.jpg
@@ -67,15 +70,18 @@ jobs:
             pl/genclient/client/GenClient.class \
             pl/genclient/client/GenHud.class \
             pl/genclient/client/VisualEffects.class \
+            pl/genclient/client/SpotifyService.class \
             pl/genclient/config/ClientConfig.class \
             pl/genclient/gui/GenButton.class \
             pl/genclient/gui/GenHubScreen.class \
+            pl/genclient/gui/SpotifyScreen.class \
             pl/genclient/gui/GenMainMenuScreen.class \
             pl/genclient/gui/GenPauseMenuScreen.class \
             pl/genclient/gui/GenScreen.class \
             pl/genclient/gui/StyleScreen.class \
             pl/genclient/gui/UiDraw.class \
             pl/genclient/gui/VisualsScreen.class \
+            pl/genclient/mixin/ClientWorldMixin.class \
             fabric.mod.json \
             genclient.mixins.json \
             genclient.refmap.json \
