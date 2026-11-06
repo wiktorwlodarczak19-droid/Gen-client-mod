@@ -1,5 +1,7 @@
 name: Build GEN CLIENT
 on:
+  push:
+    branches: ["main", "feature/gen-client-0.3.0"]
   workflow_dispatch:
 
 permissions:
@@ -31,6 +33,7 @@ jobs:
           test -f src/main/java/pl/genclient/gui/GenMainMenuScreen.java
           test -f src/main/java/pl/genclient/gui/GenPauseMenuScreen.java
           test -f src/main/java/pl/genclient/gui/VisualsScreen.java
+          test -f src/main/java/pl/genclient/gui/GenHubScreen.java
           test -f src/main/java/pl/genclient/gui/StyleScreen.java
           test -f src/main/resources/fabric.mod.json
           test -f src/main/resources/genclient.mixins.json
@@ -94,7 +97,7 @@ jobs:
           metadata = json.loads(Path("/tmp/gen-client-fabric-mod.json").read_text())
           assert metadata["id"] == "genclient", metadata
           assert metadata["environment"] == "client", metadata
-          assert metadata["version"] == "0.2.0", metadata
+          assert metadata["version"] == "0.3.0", metadata
           assert metadata["entrypoints"]["client"] == ["pl.genclient.client.GenClient"], metadata
           assert "genclient.mixins.json" in metadata["mixins"], metadata
           print(json.dumps(metadata, indent=2))
