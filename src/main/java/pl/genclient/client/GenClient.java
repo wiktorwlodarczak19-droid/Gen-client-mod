@@ -10,7 +10,7 @@ import org.lwjgl.glfw.GLFW;
 import pl.genclient.config.ClientConfig;
 import pl.genclient.gui.GenMainMenuScreen;
 import pl.genclient.gui.GenScreen;
-import pl.genclient.gui.VisualsScreen;
+import pl.genclient.gui.GenHubScreen;
 
 public final class GenClient implements ClientModInitializer {
     public static final String MOD_ID = "genclient";
@@ -45,7 +45,7 @@ public final class GenClient implements ClientModInitializer {
 
             while (openVisualsKey.wasPressed()) {
                 if (client.currentScreen == null || client.currentScreen instanceof GenMainMenuScreen) {
-                    client.setScreen(new VisualsScreen(client.currentScreen));
+                    client.setScreen(new GenHubScreen(client.currentScreen));
                 } else if (client.currentScreen instanceof GenScreen screen) {
                     screen.close();
                 }
