@@ -256,7 +256,6 @@ public final class GenHubScreen extends GenScreen {
                 case "Spotify Player" -> "Official Spotify OAuth PKCE: title, artist, playback progress and playback controls.";
                 case "FPS Counter" -> "Displays the actual Minecraft frame rate beside the local clock. The value is never fabricated or increased.";
                 case "Low FX Mode" -> "Reduces GEN CLIENT particle counts instead of inventing FPS.";
-                case "Spotify Player" -> "Official Spotify OAuth PKCE: title, artist, progress and playback controls.";
                 case "Island Text" -> "Manual capsule text. It is not automatically synchronized with music.";
                 case "Companion Badges" -> "Badges for detected Flashback and Mod Menu integrations.";
                 case "Dynamic Island" -> "Clock and FPS at the left, rounded media capsule with current track metadata at the right.";
