@@ -54,18 +54,30 @@ public final class GenHud {
         UiDraw.roundedFill(context, x + 9, y + 8, 32, 32, 16, 0xFF262230);
         context.drawTexture(LOGO_MARK, x + 11, y + 8, 28, 32, 0, 0, 530, 483, 530, 483);
 
-        String line = ClientConfig.islandMessageEnabled && !ClientConfig.islandMessage.isBlank()
-                ? ClientConfig.islandMessage
-                : track.hasTrack() ? track.title() + "  ·  " + track.artists()
-                : SpotifyService.isConnected() ? "Spotify ready — start playback" : "Connect Spotify in PLUGS";
         int barsX = x + islandWidth - 47;
         int textLeft = x + 54, textRight = barsX - 12;
-        String trimmed = client.textRenderer.trimToWidth(line, Math.max(24, textRight - textLeft));
+        int textWidth = Math.max(24, textRight - textLeft);
         int center = (textLeft + textRight) / 2;
-        if (ClientConfig.islandMessageEnabled && !ClientConfig.islandMessage.isBlank())
-            drawHighlightedLastWord(context, client, trimmed, center, y + 17, accent);
-        else
-            context.drawCenteredTextWithShadow(client.textRenderer, Text.literal(trimmed), center, y + 17, 0xFFF5F1F7);
+
+        // Keep Spotify metadata visible even when a user adds a custom second line.
+        // The manual line is deliberately independent from Spotify playback and is not
+        // presented as automatically synchronized/licensed song lyrics.
+        String title = track.hasTrack() ? track.title()
+                : SpotifyService.isConnected() ? "Spotify ready — start playback" : "Connect Spotify in PLUGS";
+        String subtitle = ClientConfig.islandMessageEnabled && !ClientConfig.islandMessage.isBlank()
+                ? ClientConfig.islandMessage
+                : track.hasTrack() ? track.artists()
+                : "GEN CLIENT  /  PERSONAL ISLAND";
+        String visibleTitle = client.textRenderer.trimToWidth(title, textWidth);
+        String visibleSubtitle = client.textRenderer.trimToWidth(subtitle, textWidth);
+        context.drawCenteredTextWithShadow(client.textRenderer, Text.literal(visibleTitle),
+                center, y + 9, 0xFFF5F1F7);
+        if (ClientConfig.islandMessageEnabled && !ClientConfig.islandMessage.isBlank()) {
+            drawHighlightedLastWord(context, client, visibleSubtitle, center, y + 24, accent);
+        } else {
+            context.drawCenteredTextWithShadow(client.textRenderer, Text.literal(visibleSubtitle),
+                    center, y + 24, 0xFFB9B4C3);
+        }
 
         long animation = System.currentTimeMillis() / 120L;
         int visualizerColor = playing ? accent : 0xFF8A8494;
