@@ -6,7 +6,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.hit.EntityHitResult;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import pl.genclient.config.ClientConfig;
