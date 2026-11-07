@@ -1,7 +1,7 @@
 name: Build GEN CLIENT
 on:
   push:
-    branches: ["main", "feature/gen-client-0.3.0"]
+    branches: ["main", "feature/gen-client-0.3.0", "feature/gen-client-polish-2026-11-07"]
   workflow_dispatch:
 
 permissions:
