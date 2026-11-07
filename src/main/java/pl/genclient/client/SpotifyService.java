@@ -110,11 +110,11 @@ public final class SpotifyService {
             String state = randomUrlSafe(24);
 
             ServerSocket server = new ServerSocket();
-            server.bind(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 0));
+            server.bind(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 8888));
             server.setSoTimeout(180_000);
             callbackSocket = server;
 
-            String redirectUri = "http://127.0.0.1:" + server.getLocalPort();
+            String redirectUri = "http://127.0.0.1:8888";
             String scope = "user-read-playback-state user-modify-playback-state";
             String authorizeUrl = AUTHORIZE_ENDPOINT
                     + "?client_id=" + enc(clientId)
@@ -142,6 +142,11 @@ public final class SpotifyService {
                 System.err.println("[GEN CLIENT] Could not open Spotify authorization page: "
                         + browserError.getMessage());
             }
+        } catch (java.net.BindException exception) {
+            status = "Port 8888 jest zajęty — zamknij proces, który go używa, i spróbuj ponownie";
+            System.err.println("[GEN CLIENT] Spotify OAuth callback port 8888 is unavailable: "
+                    + exception.getMessage());
+            closeCallbackServer();
         } catch (Exception exception) {
             status = "Nie udało się uruchomić logowania Spotify";
             System.err.println("[GEN CLIENT] Spotify OAuth startup failed: " + exception.getMessage());

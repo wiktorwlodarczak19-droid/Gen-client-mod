@@ -22,3 +22,10 @@ This branch begins the next UI iteration for Minecraft Fabric 1.21.1.
 Spotify-synchronized lyrics are intentionally not implemented: Spotify's developer policy prohibits synchronizing Spotify content with visual media. The capsule can show Spotify metadata and a separately configured manual line, but does not perform karaoke synchronization.
 
 FPS readouts must remain measurements from the Minecraft client. Performance features should be evaluated by actual frame-time/FPS improvements, not by changing the displayed number.
+
+
+## Spotify redirect URI (fixed callback port)
+- Register exactly `http://127.0.0.1:8888` in Spotify Developer Dashboard → App settings → Redirect URIs.
+- The desktop client binds its local OAuth callback listener to IPv4 loopback port `8888`.
+- The same URI is sent to Spotify's authorization and token endpoints. Do not substitute `localhost`, HTTPS, a different port, or a trailing slash.
+- If port 8888 is occupied, the client shows an actionable status message; close the process using that port and retry.

@@ -152,10 +152,10 @@ public final class SpotifyScreen extends GenScreen {
                 panelX + 30, controlsY + 31, 0xFF9BA2B1, false);
         context.drawText(textRenderer, "REDIRECT URI",
                 panelX + 30, detailsY, 0xFFF4BFD3, false);
-        context.drawText(textRenderer, "http://127.0.0.1",
+        context.drawText(textRenderer, "http://127.0.0.1:8888",
                 panelX + 30, detailsY + 14, 0xFFE5E7ED, false);
         context.drawText(textRenderer,
-                "Dodaj ten adres w Spotify Developer → App settings → Redirect URIs.",
+                "Dodaj ten adres w Spotify Developer → Settings → Redirect URIs i kliknij Save.",
                 panelX + 30, detailsY + 29, 0xFF9BA2B1, false);
 
         SpotifyService.TrackSnapshot track = SpotifyService.getSnapshot();
