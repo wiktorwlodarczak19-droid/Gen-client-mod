@@ -1,133 +1,150 @@
 package pl.genclient.client;
+
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.entity.hit.EntityHitResult;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import pl.genclient.config.ClientConfig;
 import pl.genclient.gui.UiDraw;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
-/** Compact Dynamic Island HUD: clock and measured FPS at the left, media capsule at the right. */
+/** Compact, centered media capsule inspired by modern desktop dynamic-island HUDs. */
 public final class GenHud {
-    private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm");
-    private static final Identifier LOGO_MARK = Identifier.of("genclient", "textures/gui/logo_mark.png");
     private GenHud() {}
-    public static void register() { HudRenderCallback.EVENT.register((context, tickCounter) -> render(context)); }
+
+    public static void register() {
+        HudRenderCallback.EVENT.register((context, tickCounter) -> render(context));
+    }
 
     private static void render(DrawContext context) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null || client.world == null || client.options.hudHidden) return;
+
         if (ClientConfig.dynamicIsland) {
-            context.drawTextWithShadow(client.textRenderer, Text.literal(LocalTime.now().format(CLOCK)), 24, 26, 0xFFF2F2F5);
             drawIsland(context, client);
+        } else if (ClientConfig.fpsCounter) {
+            drawFps(context, client, 12, 10);
         }
-        if (ClientConfig.fpsCounter) {
-            String fps = ClientConfig.fpsCounterLabel ? "FPS: " + client.getCurrentFps() : client.getCurrentFps() + " FPS";
-            context.drawTextWithShadow(client.textRenderer, Text.literal(fps), 110, 26, 0xFFE8EAF0);
-        }
+
         if (ClientConfig.isEnabled("Target ESP")) drawTarget(context, client);
         if (ClientConfig.modBadges) drawCompanionBadges(context, client);
     }
 
+    /** A small centered capsule; it deliberately never expands into a full-width banner. */
     private static void drawIsland(DrawContext context, MinecraftClient client) {
         int screenWidth = client.getWindow().getScaledWidth();
-        int islandWidth = Math.min(560, Math.max(270, (int) (screenWidth * 0.68f)));
-        if (screenWidth < 520) islandWidth = Math.max(210, screenWidth - 18);
-        int x = Math.max(9, screenWidth - islandWidth - 9);
-        int y = 14, height = 48;
+        int width = Math.min(326, Math.max(170, screenWidth - 60));
+        int height = 36;
+        int x = (screenWidth - width) / 2;
+        int y = 6;
         int accent = ClientConfig.islandAccentColor();
+
         SpotifyService.TrackSnapshot track = SpotifyService.getSnapshot();
-        boolean spotifyPlaying = track.hasTrack() && track.isPlaying();
-        boolean gameMusicPlaying = client.getMusicTracker().isPlayingType(client.getMusicType());
-        boolean playing = spotifyPlaying || gameMusicPlaying;
+        boolean hasTrack = track.hasTrack();
+        boolean playing = hasTrack && track.isPlaying();
 
-        UiDraw.roundedFill(context, x - 4, y - 3, islandWidth + 8, height + 6, 25, 0x38000000);
-        UiDraw.roundedPanel(context, x, y, islandWidth, height, 24, 0xF20D0D16, 0xA05A536D);
-        UiDraw.roundedFill(context, x + 18, y + 1, islandWidth - 36, 1, 1, 0x42FFFFFF);
-        UiDraw.roundedFill(context, x + 9, y + 8, 32, 32, 16, 0xFF262230);
-        context.drawTexture(LOGO_MARK, x + 11, y + 8, 28, 32, 0, 0, 530, 483, 530, 483);
+        UiDraw.roundedFill(context, x - 3, y - 2, width + 6, height + 4, 21, 0x52000000);
+        UiDraw.roundedPanel(context, x, y, width, height, 18, 0xEF0B0D15, 0xB05D586F);
+        UiDraw.roundedFill(context, x + 12, y + 1, width - 24, 1, 1, 0x44FFFFFF);
 
-        int barsX = x + islandWidth - 47;
-        int textLeft = x + 54, textRight = barsX - 12;
-        int textWidth = Math.max(24, textRight - textLeft);
-        int center = (textLeft + textRight) / 2;
+        // Music mark
+        UiDraw.roundedFill(context, x + 7, y + 7, 22, 22, 11, 0xFF242333);
+        context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("♫"),
+                x + 18, y + 13, accent);
 
-        // Keep Spotify metadata visible even when a user adds a custom second line.
-        // The manual line is deliberately independent from Spotify playback and is not
-        // presented as automatically synchronized/licensed song lyrics.
-        String title = track.hasTrack() ? track.title()
-                : SpotifyService.isConnected() ? "Spotify ready — start playback" : "Connect Spotify in PLUGS";
-        String subtitle = ClientConfig.islandMessageEnabled && !ClientConfig.islandMessage.isBlank()
-                ? ClientConfig.islandMessage
-                : track.hasTrack() ? track.artists()
-                : "GEN CLIENT  /  PERSONAL ISLAND";
-        String visibleTitle = client.textRenderer.trimToWidth(title, textWidth);
-        String visibleSubtitle = client.textRenderer.trimToWidth(subtitle, textWidth);
-        context.drawCenteredTextWithShadow(client.textRenderer, Text.literal(visibleTitle),
-                center, y + 9, 0xFFF5F1F7);
-        if (ClientConfig.islandMessageEnabled && !ClientConfig.islandMessage.isBlank()) {
-            drawHighlightedLastWord(context, client, visibleSubtitle, center, y + 24, accent);
-        } else {
-            context.drawCenteredTextWithShadow(client.textRenderer, Text.literal(visibleSubtitle),
-                    center, y + 24, 0xFFB9B4C3);
-        }
+        int visualizerX = x + width - 29;
+        int textX = x + 36;
+        int textWidth = Math.max(48, visualizerX - textX - 10);
+        String title = hasTrack ? track.title()
+                : SpotifyService.isConnected() ? "Spotify connected" : "Connect Spotify in PLUGS";
+        String artist = hasTrack ? track.artists()
+                : SpotifyService.isConnected() ? "Start playback to show your music" : "Link your account to show music";
+
+        drawMarquee(context, client, title, textX, y + 7, textWidth, 0xFFF3F1F7);
+        String visibleArtist = client.textRenderer.trimToWidth(artist, textWidth);
+        context.drawText(client.textRenderer, Text.literal(visibleArtist), textX, y + 20, 0xFFAAA7B7, false);
 
         long animation = System.currentTimeMillis() / 120L;
-        int visualizerColor = playing ? accent : 0xFF8A8494;
-        for (int i = 0; i < 5; i++) {
-            int barHeight = ClientConfig.islandVisualizerAnimated && playing
-                    ? 7 + Math.floorMod((int) animation + i * 3, 5) * 3 : 7;
-            UiDraw.roundedFill(context, barsX + i * 7, y + (height - barHeight) / 2, 4, barHeight, 2, visualizerColor);
+        int visualizerColor = playing ? accent : 0xFF777484;
+        for (int i = 0; i < 3; i++) {
+            int barHeight = playing && ClientConfig.islandVisualizerAnimated
+                    ? 5 + Math.floorMod((int) animation + i * 2, 4) * 3 : 5;
+            UiDraw.roundedFill(context, visualizerX + i * 6, y + (height - barHeight) / 2,
+                    3, barHeight, 2, visualizerColor);
         }
 
-        int progressX = x + 14, progressY = y + height - 4, progressWidth = islandWidth - 28;
-        UiDraw.roundedFill(context, progressX, progressY, progressWidth, 2, 1, 0x665F596A);
-        if (track.hasTrack() && track.durationMs() > 0) {
-            float progress = Math.max(0.0f, Math.min(1.0f, track.currentProgressMs() / (float) track.durationMs()));
-            UiDraw.roundedFill(context, progressX, progressY, Math.max(2, (int) (progressWidth * progress)), 2, 1, accent);
-        } else if (playing) {
-            int pulse = 22 + (int) Math.floorMod(animation, 42);
-            UiDraw.roundedFill(context, progressX, progressY, Math.min(progressWidth, pulse), 2, 1, accent);
+        if (ClientConfig.fpsCounter) {
+            drawFps(context, client, Math.max(5, x - 12 - client.textRenderer.getWidth(fpsLabel(client))),
+                    y + 13);
+        }
+
+        int progressX = x + 12;
+        int progressY = y + height - 2;
+        int progressWidth = width - 24;
+        UiDraw.roundedFill(context, progressX, progressY, progressWidth, 1, 1, 0x665E596A);
+        if (hasTrack && track.durationMs() > 0) {
+            float progress = Math.max(0.0f, Math.min(1.0f,
+                    track.currentProgressMs() / (float) track.durationMs()));
+            UiDraw.roundedFill(context, progressX, progressY,
+                    Math.max(1, (int) (progressWidth * progress)), 1, 1, accent);
         }
     }
 
-    private static void drawHighlightedLastWord(DrawContext context, MinecraftClient client, String value,
-                                                   int centerX, int y, int accent) {
-        if (value.isBlank()) return;
-        int split = value.lastIndexOf(' ');
-        String prefix = split >= 0 ? value.substring(0, split + 1) : "";
-        String word = split >= 0 ? value.substring(split + 1) : value;
-        int prefixWidth = client.textRenderer.getWidth(prefix), wordWidth = client.textRenderer.getWidth(word);
-        int left = centerX - (prefixWidth + wordWidth) / 2;
-        if (!prefix.isEmpty()) context.drawTextWithShadow(client.textRenderer, Text.literal(prefix), left, y, 0xFFF5F1F7);
-        UiDraw.roundedFill(context, left + prefixWidth - 2, y - 3, wordWidth + 5, 15, 8,
-                (accent & 0x00FFFFFF) | 0x66000000);
-        context.drawTextWithShadow(client.textRenderer, Text.literal(word), left + prefixWidth, y, 0xFFFFF6FB);
+    /** Long track names scroll inside the capsule instead of being permanently cut in half. */
+    private static void drawMarquee(DrawContext context, MinecraftClient client, String value,
+                                    int x, int y, int maxWidth, int color) {
+        if (maxWidth <= 0 || value == null || value.isBlank()) return;
+        int textWidth = client.textRenderer.getWidth(value);
+        if (textWidth <= maxWidth) {
+            context.drawTextWithShadow(client.textRenderer, Text.literal(value), x, y, color);
+            return;
+        }
+
+        int gap = 28;
+        int cycle = textWidth + gap;
+        int offset = (int) ((System.currentTimeMillis() / 45L) % cycle);
+        context.enableScissor(x, y - 1, x + maxWidth, y + 10);
+        context.drawTextWithShadow(client.textRenderer, Text.literal(value), x - offset, y, color);
+        context.drawTextWithShadow(client.textRenderer, Text.literal(value),
+                x - offset + cycle, y, color);
+        context.disableScissor();
+    }
+
+    private static String fpsLabel(MinecraftClient client) {
+        return client.getCurrentFps() + " fps";
+    }
+
+    private static void drawFps(DrawContext context, MinecraftClient client, int x, int y) {
+        context.drawTextWithShadow(client.textRenderer, Text.literal(fpsLabel(client)), x, y, 0xFFD4D5DE);
     }
 
     private static void drawTarget(DrawContext context, MinecraftClient client) {
         if (!(client.crosshairTarget instanceof EntityHitResult hit)) return;
         Entity target = hit.getEntity();
         if (target == client.player || !target.isAlive()) return;
-        int centerX = client.getWindow().getScaledWidth() / 2, centerY = client.getWindow().getScaledHeight() / 2;
+        int centerX = client.getWindow().getScaledWidth() / 2;
+        int centerY = client.getWindow().getScaledHeight() / 2;
         String name = target.getName().getString();
         if (name.length() > 22) name = name.substring(0, 19) + "...";
-        String health = target instanceof LivingEntity living ? MathHelper.ceil(living.getHealth()) + " HP" : "ENTITY";
+        String health = target instanceof LivingEntity living
+                ? MathHelper.ceil(living.getHealth()) + " HP" : "ENTITY";
         int panelWidth = Math.max(104, client.textRenderer.getWidth(name) + 42);
-        int left = Math.min(centerX + 14, Math.max(6, client.getWindow().getScaledWidth() - panelWidth - 6));
-        int top = Math.min(centerY + 12, Math.max(6, client.getWindow().getScaledHeight() - 38));
+        int left = Math.min(centerX + 14,
+                Math.max(6, client.getWindow().getScaledWidth() - panelWidth - 6));
+        int top = Math.min(centerY + 12,
+                Math.max(6, client.getWindow().getScaledHeight() - 38));
         int accent = ClientConfig.effectColor("Target ESP");
-        UiDraw.roundedPanel(context, left, top, panelWidth, 32, 8, 0xE30A0C12, 0x705B606D);
+        UiDraw.roundedPanel(context, left, top, panelWidth, 32, 8,
+                0xE30A0C12, 0x705B606D);
         UiDraw.roundedFill(context, left + 1, top + 6, 2, 20, 1, accent);
-        context.drawTextWithShadow(client.textRenderer, Text.literal(name), left + 9, top + 6, 0xFFFFFFFF);
-        context.drawText(client.textRenderer, Text.literal(health), left + 9, top + 17, 0xFFB5BCC9, false);
+        context.drawTextWithShadow(client.textRenderer, Text.literal(name),
+                left + 9, top + 6, 0xFFFFFFFF);
+        context.drawText(client.textRenderer, Text.literal(health),
+                left + 9, top + 17, 0xFFB5BCC9, false);
     }
 
     private static void drawCompanionBadges(DrawContext context, MinecraftClient client) {
@@ -139,8 +156,10 @@ public final class GenHud {
         if (flashback) drawBadge(context, x, y, 0xFFBFA7FF, true);
         if (modMenu) drawBadge(context, x, y + (flashback ? 27 : 0), 0xFF9ECBFF, false);
     }
+
     private static void drawBadge(DrawContext context, int x, int y, int accent, boolean cameraIcon) {
-        UiDraw.roundedPanel(context, x - 2, y - 2, 24, 24, 7, 0xE90B0D12, 0x705B606D);
+        UiDraw.roundedPanel(context, x - 2, y - 2, 24, 24, 7,
+                0xE90B0D12, 0x705B606D);
         UiDraw.roundedFill(context, x + 2, y - 1, 16, 2, 1, accent);
         if (cameraIcon) {
             UiDraw.roundedFill(context, x + 4, y + 7, 13, 9, 2, accent);

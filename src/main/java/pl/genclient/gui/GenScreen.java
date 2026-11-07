@@ -34,6 +34,11 @@ public abstract class GenScreen extends Screen {
         if (showHeader()) drawHeader(context);
         drawPetals(context);
         renderBody(context, mouseX, mouseY, delta);
+        renderWidgets(context, mouseX, mouseY, delta);
+    }
+
+    /** Hook for screens that need to clip their controls (for example, scrollable setup panels). */
+    protected void renderWidgets(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
     }
 
