@@ -6,14 +6,19 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.text.Text;
+import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.MathHelper;
 import pl.genclient.config.ClientConfig;
 import pl.genclient.gui.UiDraw;
 
-/** Compact, centered media capsule inspired by modern desktop dynamic-island HUDs. */
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+/** Modern top HUD: local clock and measured FPS on the left, Spotify capsule on the right. */
 public final class GenHud {
+    private static final DateTimeFormatter CLOCK_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+
     private GenHud() {}
 
     public static void register() {
@@ -34,52 +39,100 @@ public final class GenHud {
         if (ClientConfig.modBadges) drawCompanionBadges(context, client);
     }
 
-    /** A small centered capsule; it deliberately never expands into a full-width banner. */
+    /**
+     * Mirrors the supplied layout: live local time/FPS at the upper left and a compact,
+     * right-aligned media capsule. On narrow GUI widths the capsule moves to a second row
+     * rather than colliding with the status cluster.
+     */
     private static void drawIsland(DrawContext context, MinecraftClient client) {
         int screenWidth = client.getWindow().getScaledWidth();
-        int width = Math.min(326, Math.max(170, screenWidth - 60));
-        int height = 36;
-        int x = (screenWidth - width) / 2;
-        int y = 6;
-        int accent = ClientConfig.islandAccentColor();
+        int top = 8;
+        int statusWidth = statusClusterWidth(client);
+        boolean stacked = screenWidth < 420;
 
+        drawStatusCluster(context, client, 12, top, statusWidth);
+
+        int capsuleWidth = stacked
+                ? Math.max(150, screenWidth - 24)
+                : Math.max(180, Math.min(340, screenWidth - statusWidth - 36));
+        capsuleWidth = Math.min(capsuleWidth, Math.max(150, screenWidth - 24));
+        int capsuleX = stacked ? (screenWidth - capsuleWidth) / 2 : screenWidth - capsuleWidth - 12;
+        int capsuleY = stacked ? top + 48 : top;
+        drawMediaCapsule(context, client, capsuleX, capsuleY, capsuleWidth);
+    }
+
+    private static int statusClusterWidth(MinecraftClient client) {
+        String time = LocalTime.now().format(CLOCK_FORMAT);
+        int width = 27 + client.textRenderer.getWidth(time) + 10;
+        if (ClientConfig.fpsCounter) {
+            width += 1 + 9 + client.textRenderer.getWidth(fpsLabel(client)) + 10;
+        }
+        return width;
+    }
+
+    private static void drawStatusCluster(DrawContext context, MinecraftClient client,
+                                          int x, int y, int width) {
+        int height = 40;
+        int accent = ClientConfig.islandAccentColor();
+        UiDraw.roundedFill(context, x - 2, y - 2, width + 4, height + 4, 20, 0x52000000);
+        UiDraw.roundedPanel(context, x, y, width, height, 17, 0xE90B0D15, 0x805D586F);
+
+        // A small hand-drawn clock glyph avoids relying on Minecraft's pixel-font icon set.
+        UiDraw.roundedFill(context, x + 9, y + 14, 12, 12, 6, 0xFF292633);
+        UiDraw.roundedFill(context, x + 14, y + 16, 1, 5, 1, accent);
+        UiDraw.roundedFill(context, x + 14, y + 20, 4, 1, 1, accent);
+
+        String time = LocalTime.now().format(CLOCK_FORMAT);
+        int timeX = x + 27;
+        context.drawTextWithShadow(client.textRenderer, Text.literal(time), timeX, y + 15, 0xFFF3F1F7);
+
+        if (ClientConfig.fpsCounter) {
+            int separatorX = timeX + client.textRenderer.getWidth(time) + 8;
+            UiDraw.roundedFill(context, separatorX, y + 10, 1, 20, 1, 0x665D586F);
+            context.drawTextWithShadow(client.textRenderer, Text.literal(fpsLabel(client)),
+                    separatorX + 10, y + 15, 0xFFD4D5DE);
+        }
+    }
+
+    private static void drawMediaCapsule(DrawContext context, MinecraftClient client,
+                                         int x, int y, int width) {
+        int height = 40;
+        int accent = ClientConfig.islandAccentColor();
         SpotifyService.TrackSnapshot track = SpotifyService.getSnapshot();
         boolean hasTrack = track.hasTrack();
         boolean playing = hasTrack && track.isPlaying();
 
         UiDraw.roundedFill(context, x - 3, y - 2, width + 6, height + 4, 21, 0x52000000);
-        UiDraw.roundedPanel(context, x, y, width, height, 18, 0xEF0B0D15, 0xB05D586F);
-        UiDraw.roundedFill(context, x + 12, y + 1, width - 24, 1, 1, 0x44FFFFFF);
+        UiDraw.roundedPanel(context, x, y, width, height, 19, 0xE90B0D15, 0xB05D586F);
+        UiDraw.roundedFill(context, x + 13, y + 1, width - 26, 1, 1, 0x44FFFFFF);
 
-        // Music mark
-        UiDraw.roundedFill(context, x + 7, y + 7, 22, 22, 11, 0xFF242333);
+        // Until album-art texture loading is implemented, use a consistent music glyph.
+        UiDraw.roundedPanel(context, x + 8, y + 8, 24, 24, 12, 0xFF242333, 0x605D586F);
         context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("♫"),
-                x + 18, y + 13, accent);
+                x + 20, y + 16, accent);
 
-        int visualizerX = x + width - 29;
-        int textX = x + 36;
-        int textWidth = Math.max(48, visualizerX - textX - 10);
+        int visualizerX = x + width - 34;
+        int textX = x + 40;
+        int textWidth = Math.max(40, visualizerX - textX - 8);
         String title = hasTrack ? track.title()
                 : SpotifyService.isConnected() ? "Spotify connected" : "Connect Spotify in PLUGS";
         String artist = hasTrack ? track.artists()
                 : SpotifyService.isConnected() ? "Start playback to show your music" : "Link your account to show music";
 
-        drawMarquee(context, client, title, textX, y + 7, textWidth, 0xFFF3F1F7);
+        drawMarquee(context, client, title, textX, y + 8, textWidth, 0xFFF3F1F7);
         String visibleArtist = client.textRenderer.trimToWidth(artist, textWidth);
-        context.drawText(client.textRenderer, Text.literal(visibleArtist), textX, y + 20, 0xFFAAA7B7, false);
+        context.drawText(client.textRenderer, Text.literal(visibleArtist), textX, y + 21, 0xFFAAA7B7, false);
 
-        long animation = System.currentTimeMillis() / 120L;
+        long animationTime = System.currentTimeMillis();
         int visualizerColor = playing ? accent : 0xFF777484;
-        for (int i = 0; i < 3; i++) {
-            int barHeight = playing && ClientConfig.islandVisualizerAnimated
-                    ? 5 + Math.floorMod((int) animation + i * 2, 4) * 3 : 5;
-            UiDraw.roundedFill(context, visualizerX + i * 6, y + (height - barHeight) / 2,
+        for (int i = 0; i < 5; i++) {
+            int barHeight = 4;
+            if (playing && ClientConfig.islandVisualizerAnimated) {
+                double phase = animationTime / 245.0 + i * 0.88;
+                barHeight += (int) Math.round((Math.sin(phase) + 1.0) * 3.5);
+            }
+            UiDraw.roundedFill(context, visualizerX + i * 5, y + (height - barHeight) / 2,
                     3, barHeight, 2, visualizerColor);
-        }
-
-        if (ClientConfig.fpsCounter) {
-            drawFps(context, client, Math.max(5, x - 12 - client.textRenderer.getWidth(fpsLabel(client))),
-                    y + 13);
         }
 
         int progressX = x + 12;
@@ -115,7 +168,9 @@ public final class GenHud {
     }
 
     private static String fpsLabel(MinecraftClient client) {
-        return client.getCurrentFps() + " fps";
+        return ClientConfig.fpsCounterLabel
+                ? "FPS: " + client.getCurrentFps()
+                : client.getCurrentFps() + " FPS";
     }
 
     private static void drawFps(DrawContext context, MinecraftClient client, int x, int y) {

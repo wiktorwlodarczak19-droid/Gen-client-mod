@@ -7,7 +7,8 @@ This branch begins the next UI iteration for Minecraft Fabric 1.21.1.
 - Main sections: Mods, Visual, GenLand, Addons and Plugs.
 - Visual module rows with ON/OFF controls and separate settings entry points.
 - GenLand controls for the existing Dynamic Island HUD and Sakura sky petals.
-- Dynamic Island follows the supplied layout: local time and actual FPS at the left; a rounded media capsule at the right with GEN mark, current track title/artist, progress strip and animated/static visualizer.
+- Dynamic Island follows the supplied top-bar layout: local system time and measured Minecraft FPS at the left; a compact rounded Spotify media capsule aligned to the right. Narrow GUI widths use a second row to prevent overlap.
+- The capsule shows current track title/artist, playback progress and a five-bar animated/static visualizer. A music glyph remains a placeholder; Spotify album-art download and texture rendering are not implemented yet.
 - Spotify metadata integration uses official OAuth PKCE and displays title and artist on separate lines with playback progress. A separate manual capsule second line remains visible alongside the real track title; it is not automatically synchronized lyrics.
 - Custom Sky applies a real client-side sky tint and has palette/blend-strength controls.
 - Visual particle effects have individual colour palettes and three intensity levels; Low FX Mode reduces their particle count.

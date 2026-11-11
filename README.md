@@ -15,11 +15,12 @@ Client-side mod do Minecraft Java **1.21.1** na **Fabric**, rozwijający własny
 - Konfiguracja jest przechowywana w `config/genclient.json`.
 
 ## Dynamic Island
-- Zegar systemowy i rzeczywisty FPS po lewej stronie.
-- Zaokrąglona kapsuła po prawej stronie, z logo GEN CLIENT.
+- Lokalna godzina systemowa (HH:mm) i rzeczywisty FPS po lewej stronie.
+- Kompaktowa, półprzezroczysta kapsuła Spotify wyrównana do prawej krawędzi; na wąskich ekranach przechodzi do drugiego wiersza, aby nie nachodzić na zegar i FPS.
 - Tytuł utworu, wykonawca i pasek postępu z oficjalnej integracji Spotify.
-- Animowany albo statyczny wizualizer.
-- Opcjonalna ręcznie wpisywana linijka tekstu z wyróżnieniem ostatniego słowa.
+- Pięcioelementowy, płynnie animowany albo statyczny wizualizer.
+- Ikona muzyczna jest tymczasowym znakiem zastępczym; pobieranie i renderowanie okładki albumu nie jest jeszcze zaimplementowane.
+- Pole własnego tekstu można zapisać w ustawieniach, ale jego renderowanie w HUD nie jest jeszcze zaimplementowane.
 
 **Lyrics:** nie ma automatycznej synchronizacji tekstu piosenki z nagraniem Spotify. Polityka Spotify Developer zabrania synchronizowania treści Spotify z materiałami wizualnymi. Ręczny tekst w kapsule jest niezależny od odtwarzania.
 
