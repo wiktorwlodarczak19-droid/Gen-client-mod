@@ -9,7 +9,7 @@ This branch begins the next UI iteration for Minecraft Fabric 1.21.1.
 - GenLand controls for the existing Dynamic Island HUD and Sakura sky petals.
 - Dynamic Island follows the supplied top-bar layout: local system time and measured Minecraft FPS at the left; a compact rounded Spotify media capsule aligned to the right. Narrow GUI widths use a second row to prevent overlap.
 - The capsule shows current track title/artist, playback progress and a five-bar animated/static visualizer. A music glyph remains a placeholder; Spotify album-art download and texture rendering are not implemented yet.
-- Spotify metadata integration uses official OAuth PKCE and displays title and artist on separate lines with playback progress. The manual Island Text value is saved by settings but is not rendered in the HUD yet. No synchronized lyrics are provided.
+- Spotify metadata integration uses official OAuth PKCE and displays title and artist on separate lines with playback progress. When enabled, Island Text appears as a third, independently configured line; it is not sourced from Spotify and is not synchronized lyrics.
 - Custom Sky applies a real client-side sky tint and has palette/blend-strength controls.
 - Visual particle effects have individual colour palettes and three intensity levels; Low FX Mode reduces their particle count.
 - Existing visual modules remain connected to the saved client configuration.
@@ -17,7 +17,7 @@ This branch begins the next UI iteration for Minecraft Fabric 1.21.1.
 
 ## Next implementation stages
 - Add dedicated renderers for translucent glass armour and held-item glint rather than representing them only with particles.
-- Add the remaining island appearance controls (album art when the provider exposes it and layout sizing).
+- Add the remaining island appearance controls and layout sizing. Spotify artwork is not downloaded or cached; the HUD keeps a neutral music glyph to respect Spotify content-use restrictions.
 - Expand GenLand text animation presets and plugin/add-on registry.
 
 Spotify-synchronized lyrics are intentionally not implemented: Spotify's developer policy prohibits synchronizing Spotify content with visual media. The capsule can show Spotify metadata and a separately configured manual line, but does not perform karaoke synchronization.

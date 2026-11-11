@@ -20,9 +20,9 @@ Client-side mod do Minecraft Java **1.21.1** na **Fabric**, rozwijający własny
 - Tytuł utworu, wykonawca i pasek postępu z oficjalnej integracji Spotify.
 - Pięcioelementowy, płynnie animowany albo statyczny wizualizer.
 - Ikona muzyczna jest tymczasowym znakiem zastępczym; pobieranie i renderowanie okładki albumu nie jest jeszcze zaimplementowane.
-- Pole własnego tekstu można zapisać w ustawieniach, ale jego renderowanie w HUD nie jest jeszcze zaimplementowane.
+- Opcjonalna własna linijka tekstu jest renderowana pod tytułem i wykonawcą; to tekst wpisany przez użytkownika, nie zsynchronizowane lyrics.
 
-**Lyrics:** GEN CLIENT nie pobiera ani nie synchronizuje tekstów piosenek. Wartość własnego tekstu można zapisać w ustawieniach, ale jej renderowanie w HUD nie jest jeszcze zaimplementowane.
+**Lyrics:** GEN CLIENT nie pobiera ani nie synchronizuje tekstów piosenek. Własna linijka w Island Text jest niezależna od utworu i nie udaje synchronizacji. Okładki Spotify nie są pobierane ani przechowywane lokalnie.
 
 ## Mods
 - FPS Counter — rzeczywisty FPS Minecrafta.

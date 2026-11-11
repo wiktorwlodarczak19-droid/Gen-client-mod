@@ -96,20 +96,23 @@ public final class GenHud {
 
     private static void drawMediaCapsule(DrawContext context, MinecraftClient client,
                                          int x, int y, int width) {
-        int height = 40;
         int accent = ClientConfig.islandAccentColor();
         SpotifyService.TrackSnapshot track = SpotifyService.getSnapshot();
         boolean hasTrack = track.hasTrack();
         boolean playing = hasTrack && track.isPlaying();
+        boolean showManualMessage = ClientConfig.islandMessageEnabled
+                && !ClientConfig.islandMessage.isBlank();
+        int height = showManualMessage ? 50 : 40;
 
         UiDraw.roundedFill(context, x - 3, y - 2, width + 6, height + 4, 21, 0x52000000);
         UiDraw.roundedPanel(context, x, y, width, height, 19, 0xE90B0D15, 0xB05D586F);
         UiDraw.roundedFill(context, x + 13, y + 1, width - 26, 1, 1, 0x44FFFFFF);
 
-        // Until album-art texture loading is implemented, use a consistent music glyph.
-        UiDraw.roundedPanel(context, x + 8, y + 8, 24, 24, 12, 0xFF242333, 0x605D586F);
+        // Spotify artwork is intentionally not downloaded or cached; use a neutral music glyph.
+        int iconY = y + (height - 24) / 2;
+        UiDraw.roundedPanel(context, x + 8, iconY, 24, 24, 12, 0xFF242333, 0x605D586F);
         context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("♫"),
-                x + 20, y + 16, accent);
+                x + 20, iconY + 8, accent);
 
         int visualizerX = x + width - 34;
         int textX = x + 40;
@@ -119,9 +122,15 @@ public final class GenHud {
         String artist = hasTrack ? track.artists()
                 : SpotifyService.isConnected() ? "Start playback to show your music" : "Link your account to show music";
 
-        drawMarquee(context, client, title, textX, y + 8, textWidth, 0xFFF3F1F7);
+        drawMarquee(context, client, title, textX, y + (showManualMessage ? 6 : 8),
+                textWidth, 0xFFF3F1F7);
         String visibleArtist = client.textRenderer.trimToWidth(artist, textWidth);
-        context.drawText(client.textRenderer, Text.literal(visibleArtist), textX, y + 21, 0xFFAAA7B7, false);
+        context.drawText(client.textRenderer, Text.literal(visibleArtist), textX,
+                y + (showManualMessage ? 18 : 21), 0xFFAAA7B7, false);
+        if (showManualMessage) {
+            drawMarquee(context, client, ClientConfig.islandMessage, textX, y + 31,
+                    textWidth, 0xFFD9C8FF);
+        }
 
         long animationTime = System.currentTimeMillis();
         int visualizerColor = playing ? accent : 0xFF777484;
