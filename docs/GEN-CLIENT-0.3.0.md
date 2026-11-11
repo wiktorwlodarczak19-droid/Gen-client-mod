@@ -30,3 +30,11 @@ FPS readouts must remain measurements from the Minecraft client. Performance fea
 - The desktop client binds its local OAuth callback listener to IPv4 loopback port `8888`.
 - The same URI is sent to Spotify's authorization and token endpoints. Do not substitute `localhost`, HTTPS, a different port, or a trailing slash.
 - If port 8888 is occupied, the client shows an actionable status message; close the process using that port and retry.
+
+
+## Dynamic Island typography update
+- Dynamic Island labels (clock, FPS, track title/artist, optional manual line) and Target ESP text use bundled Poppins TTF fonts instead of Minecraft's default bitmap font.
+- The regular and medium Poppins files are exposed as separate resource fonts so title/time weight is distinct from secondary text.
+- The default Minecraft font is not replaced globally; this is scoped to GEN CLIENT HUD text.
+- The upstream Poppins font is distributed under SIL Open Font License 1.1; the full license is bundled at `licenses/Poppins-OFL.txt`.
+- Spotify album artwork remains a placeholder: the current branch does not download or cache Spotify artwork, and the feature is not claimed as implemented.

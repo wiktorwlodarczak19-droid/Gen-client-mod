@@ -1,0 +1,14 @@
+{
+  "providers": [
+    {
+      "type": "ttf",
+      "file": "genclient:font/Poppins-Medium.ttf",
+      "shift": [
+        0,
+        0
+      ],
+      "size": 9,
+      "oversample": 2
+    }
+  ]
+}

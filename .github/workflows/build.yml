@@ -1,7 +1,7 @@
 name: Build GEN CLIENT
 on:
   push:
-    branches: ["main", "feature/gen-client-0.3.0", "feature/gen-client-polish-2026-11-07", "feature/dynamic-island-layout-2026-11-11"]
+    branches: ["main", "feature/gen-client-0.3.0", "feature/gen-client-polish-2026-11-07", "feature/dynamic-island-layout-2026-11-11", "feature/dynamic-island-typography-2026-11-11"]
   workflow_dispatch:
 
 permissions:
@@ -45,6 +45,30 @@ jobs:
           test -f src/main/resources/assets/genclient/textures/gui/wallpapers/sakura_dark.jpg
           test -f src/main/resources/assets/genclient/textures/gui/wallpapers/midnight_ink.jpg
           test -f src/main/resources/assets/genclient/textures/gui/wallpapers/main_menu_mountains.jpg
+          test -f src/main/resources/assets/genclient/font/ui.json
+          test -f src/main/resources/assets/genclient/font/ui_medium.json
+          test -s src/main/resources/assets/genclient/font/Poppins-Regular.ttf
+          test -s src/main/resources/assets/genclient/font/Poppins-Medium.ttf
+          test -f src/main/resources/licenses/Poppins-OFL.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          expected = {
+              "ui": "genclient:font/Poppins-Regular.ttf",
+              "ui_medium": "genclient:font/Poppins-Medium.ttf",
+          }
+          for font_id, font_file in expected.items():
+              path = Path(f"src/main/resources/assets/genclient/font/{font_id}.json")
+              data = json.loads(path.read_text())
+              provider = data["providers"][0]
+              assert provider["type"] == "ttf", (font_id, provider)
+              assert provider["file"] == font_file, (font_id, provider)
+              assert provider["size"] >= 8.0, (font_id, provider)
+          license_text = Path("src/main/resources/licenses/Poppins-OFL.txt").read_text()
+          assert "SIL OPEN FONT LICENSE Version 1.1" in license_text
+          print("Bundled Poppins font providers and OFL license verified.")
+          PY
           echo "All GEN CLIENT sources and resources are present."
 
       - name: Build with Fabric Loom
@@ -90,10 +114,15 @@ jobs:
             assets/genclient/textures/gui/wallpapers/sakura_dark.jpg \
             assets/genclient/textures/gui/wallpapers/midnight_ink.jpg \
             assets/genclient/textures/gui/wallpapers/main_menu_mountains.jpg \
+            assets/genclient/font/ui.json \
+            assets/genclient/font/ui_medium.json \
+            assets/genclient/font/Poppins-Regular.ttf \
+            assets/genclient/font/Poppins-Medium.ttf \
+            licenses/Poppins-OFL.txt \
             assets/genclient/lang/pl_pl.json \
             assets/genclient/lang/en_us.json
           do
-            grep -qx "$entry" /tmp/gen-client-jar-contents.txt
+            grep -Fqx "$entry" /tmp/gen-client-jar-contents.txt
           done
 
           unzip -p "$JAR" fabric.mod.json > /tmp/gen-client-fabric-mod.json
@@ -108,6 +137,23 @@ jobs:
           assert metadata["entrypoints"]["client"] == ["pl.genclient.client.GenClient"], metadata
           assert "genclient.mixins.json" in metadata["mixins"], metadata
           print(json.dumps(metadata, indent=2))
+          PY
+
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+
+          jar = Path("build/libs") / f"gen-client-{Path('gradle.properties').read_text().split('mod_version=')[1].splitlines()[0]}.jar"
+          with zipfile.ZipFile(jar) as archive:
+              for name in (
+                  "assets/genclient/font/Poppins-Regular.ttf",
+                  "assets/genclient/font/Poppins-Medium.ttf",
+              ):
+                  data = archive.read(name)
+                  assert data[:4] == b"\\x00\\x01\\x00\\x00", (name, data[:4])
+                  assert len(data) > 100_000, (name, len(data))
+              assert b"SIL OPEN FONT LICENSE Version 1.1" in archive.read("licenses/Poppins-OFL.txt")
+          print("Packaged TTF signatures, sizes and font license verified.")
           PY
 
           mkdir -p build/distribution

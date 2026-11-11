@@ -6,7 +6,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.MathHelper;
 import pl.genclient.config.ClientConfig;
@@ -18,8 +20,18 @@ import java.time.format.DateTimeFormatter;
 /** Modern top HUD: local clock and measured FPS on the left, Spotify capsule on the right. */
 public final class GenHud {
     private static final DateTimeFormatter CLOCK_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    private static final Identifier UI_FONT = Identifier.of("genclient", "ui");
+    private static final Identifier UI_FONT_MEDIUM = Identifier.of("genclient", "ui_medium");
 
     private GenHud() {}
+
+    private static Text uiText(String value) {
+        return Text.literal(value).setStyle(Style.EMPTY.withFont(UI_FONT));
+    }
+
+    private static Text uiMediumText(String value) {
+        return Text.literal(value).setStyle(Style.EMPTY.withFont(UI_FONT_MEDIUM));
+    }
 
     public static void register() {
         HudRenderCallback.EVENT.register((context, tickCounter) -> render(context));
@@ -63,9 +75,9 @@ public final class GenHud {
 
     private static int statusClusterWidth(MinecraftClient client) {
         String time = LocalTime.now().format(CLOCK_FORMAT);
-        int width = 27 + client.textRenderer.getWidth(time) + 10;
+        int width = 27 + client.textRenderer.getWidth(uiMediumText(time)) + 10;
         if (ClientConfig.fpsCounter) {
-            width += 1 + 9 + client.textRenderer.getWidth(fpsLabel(client)) + 10;
+            width += 1 + 9 + client.textRenderer.getWidth(uiText(fpsLabel(client))) + 10;
         }
         return width;
     }
@@ -84,7 +96,7 @@ public final class GenHud {
 
         String time = LocalTime.now().format(CLOCK_FORMAT);
         int timeX = x + 27;
-        context.drawTextWithShadow(client.textRenderer, Text.literal(time), timeX, y + 15, 0xFFF3F1F7);
+        context.drawTextWithShadow(client.textRenderer, uiMediumText(time), timeX, y + 15, 0xFFF3F1F7);
 
         if (ClientConfig.fpsCounter) {
             int separatorX = timeX + client.textRenderer.getWidth(time) + 8;
@@ -122,13 +134,12 @@ public final class GenHud {
         String artist = hasTrack ? track.artists()
                 : SpotifyService.isConnected() ? "Start playback to show your music" : "Link your account to show music";
 
-        drawMarquee(context, client, title, textX, y + (showManualMessage ? 6 : 8),
-                textWidth, 0xFFF3F1F7);
-        String visibleArtist = client.textRenderer.trimToWidth(artist, textWidth);
-        context.drawText(client.textRenderer, Text.literal(visibleArtist), textX,
-                y + (showManualMessage ? 18 : 21), 0xFFAAA7B7, false);
+        drawMarquee(context, client, uiMediumText(title), textX,
+                y + (showManualMessage ? 6 : 8), textWidth, 0xFFF3F1F7);
+        drawMarquee(context, client, uiText(artist), textX,
+                y + (showManualMessage ? 18 : 21), textWidth, 0xFFAAA7B7);
         if (showManualMessage) {
-            drawMarquee(context, client, ClientConfig.islandMessage, textX, y + 31,
+            drawMarquee(context, client, uiText(ClientConfig.islandMessage), textX, y + 31,
                     textWidth, 0xFFD9C8FF);
         }
 
@@ -156,13 +167,13 @@ public final class GenHud {
         }
     }
 
-    /** Long track names scroll inside the capsule instead of being permanently cut in half. */
-    private static void drawMarquee(DrawContext context, MinecraftClient client, String value,
+    /** Long labels scroll inside the capsule using the selected smooth TTF font. */
+    private static void drawMarquee(DrawContext context, MinecraftClient client, Text value,
                                     int x, int y, int maxWidth, int color) {
-        if (maxWidth <= 0 || value == null || value.isBlank()) return;
+        if (maxWidth <= 0 || value == null || value.getString().isBlank()) return;
         int textWidth = client.textRenderer.getWidth(value);
         if (textWidth <= maxWidth) {
-            context.drawTextWithShadow(client.textRenderer, Text.literal(value), x, y, color);
+            context.drawTextWithShadow(client.textRenderer, value, x, y, color);
             return;
         }
 
@@ -170,8 +181,8 @@ public final class GenHud {
         int cycle = textWidth + gap;
         int offset = (int) ((System.currentTimeMillis() / 45L) % cycle);
         context.enableScissor(x, y - 1, x + maxWidth, y + 10);
-        context.drawTextWithShadow(client.textRenderer, Text.literal(value), x - offset, y, color);
-        context.drawTextWithShadow(client.textRenderer, Text.literal(value),
+        context.drawTextWithShadow(client.textRenderer, value, x - offset, y, color);
+        context.drawTextWithShadow(client.textRenderer, value,
                 x - offset + cycle, y, color);
         context.disableScissor();
     }
@@ -183,7 +194,7 @@ public final class GenHud {
     }
 
     private static void drawFps(DrawContext context, MinecraftClient client, int x, int y) {
-        context.drawTextWithShadow(client.textRenderer, Text.literal(fpsLabel(client)), x, y, 0xFFD4D5DE);
+        context.drawTextWithShadow(client.textRenderer, uiText(fpsLabel(client)), x, y, 0xFFD4D5DE);
     }
 
     private static void drawTarget(DrawContext context, MinecraftClient client) {
@@ -196,7 +207,7 @@ public final class GenHud {
         if (name.length() > 22) name = name.substring(0, 19) + "...";
         String health = target instanceof LivingEntity living
                 ? MathHelper.ceil(living.getHealth()) + " HP" : "ENTITY";
-        int panelWidth = Math.max(104, client.textRenderer.getWidth(name) + 42);
+        int panelWidth = Math.max(104, client.textRenderer.getWidth(uiMediumText(name)) + 42);
         int left = Math.min(centerX + 14,
                 Math.max(6, client.getWindow().getScaledWidth() - panelWidth - 6));
         int top = Math.min(centerY + 12,
@@ -205,9 +216,9 @@ public final class GenHud {
         UiDraw.roundedPanel(context, left, top, panelWidth, 32, 8,
                 0xE30A0C12, 0x705B606D);
         UiDraw.roundedFill(context, left + 1, top + 6, 2, 20, 1, accent);
-        context.drawTextWithShadow(client.textRenderer, Text.literal(name),
+        context.drawTextWithShadow(client.textRenderer, uiMediumText(name),
                 left + 9, top + 6, 0xFFFFFFFF);
-        context.drawText(client.textRenderer, Text.literal(health),
+        context.drawText(client.textRenderer, uiText(health),
                 left + 9, top + 17, 0xFFB5BCC9, false);
     }
 

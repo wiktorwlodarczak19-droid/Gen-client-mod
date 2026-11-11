@@ -19,6 +19,7 @@ Client-side mod do Minecraft Java **1.21.1** na **Fabric**, rozwijający własny
 - Kompaktowa, półprzezroczysta kapsuła Spotify wyrównana do prawej krawędzi; na wąskich ekranach przechodzi do drugiego wiersza, aby nie nachodzić na zegar i FPS.
 - Tytuł utworu, wykonawca i pasek postępu z oficjalnej integracji Spotify.
 - Pięcioelementowy, płynnie animowany albo statyczny wizualizer.
+- Własna typografia Poppins (TTF) dla tekstu wyspy i Target ESP; domyślna czcionka Minecrafta pozostaje bez zmian w pozostałych ekranach.
 - Ikona muzyczna jest tymczasowym znakiem zastępczym; pobieranie i renderowanie okładki albumu nie jest jeszcze zaimplementowane.
 - Opcjonalna własna linijka tekstu jest renderowana pod tytułem i wykonawcą; to tekst wpisany przez użytkownika, nie zsynchronizowane lyrics.
 
