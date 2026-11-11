@@ -22,7 +22,7 @@ Client-side mod do Minecraft Java **1.21.1** na **Fabric**, rozwijający własny
 - Ikona muzyczna jest tymczasowym znakiem zastępczym; pobieranie i renderowanie okładki albumu nie jest jeszcze zaimplementowane.
 - Pole własnego tekstu można zapisać w ustawieniach, ale jego renderowanie w HUD nie jest jeszcze zaimplementowane.
 
-**Lyrics:** nie ma automatycznej synchronizacji tekstu piosenki z nagraniem Spotify. Polityka Spotify Developer zabrania synchronizowania treści Spotify z materiałami wizualnymi. Ręczny tekst w kapsule jest niezależny od odtwarzania.
+**Lyrics:** GEN CLIENT nie pobiera ani nie synchronizuje tekstów piosenek. Wartość własnego tekstu można zapisać w ustawieniach, ale jej renderowanie w HUD nie jest jeszcze zaimplementowane.
 
 ## Mods
 - FPS Counter — rzeczywisty FPS Minecrafta.
