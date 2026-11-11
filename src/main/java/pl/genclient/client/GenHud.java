@@ -99,9 +99,9 @@ public final class GenHud {
         context.drawTextWithShadow(client.textRenderer, uiMediumText(time), timeX, y + 15, 0xFFF3F1F7);
 
         if (ClientConfig.fpsCounter) {
-            int separatorX = timeX + client.textRenderer.getWidth(time) + 8;
+            int separatorX = timeX + client.textRenderer.getWidth(uiMediumText(time)) + 8;
             UiDraw.roundedFill(context, separatorX, y + 10, 1, 20, 1, 0x665D586F);
-            context.drawTextWithShadow(client.textRenderer, Text.literal(fpsLabel(client)),
+            context.drawTextWithShadow(client.textRenderer, uiText(fpsLabel(client)),
                     separatorX + 10, y + 15, 0xFFD4D5DE);
         }
     }

@@ -150,7 +150,7 @@ jobs:
                   "assets/genclient/font/Poppins-Medium.ttf",
               ):
                   data = archive.read(name)
-                  assert data[:4] == b"\\x00\\x01\\x00\\x00", (name, data[:4])
+                  assert data[:4] == bytes.fromhex("00010000"), (name, data[:4])
                   assert len(data) > 100_000, (name, len(data))
               assert b"SIL OPEN FONT LICENSE Version 1.1" in archive.read("licenses/Poppins-OFL.txt")
           print("Packaged TTF signatures, sizes and font license verified.")
