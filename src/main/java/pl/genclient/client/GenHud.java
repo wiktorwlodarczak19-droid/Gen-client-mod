@@ -120,14 +120,15 @@ public final class GenHud {
         UiDraw.roundedPanel(context, x, y, width, height, 19, 0xE90B0D15, 0xB05D586F);
         UiDraw.roundedFill(context, x + 13, y + 1, width - 26, 1, 1, 0x44FFFFFF);
 
-        // Spotify artwork is intentionally not downloaded or cached; use a neutral music glyph.
+        // Keep Spotify artwork out of the HUD and use a compact GEN CLIENT brand mark instead.
         int iconY = y + (height - 24) / 2;
-        UiDraw.roundedPanel(context, x + 8, iconY, 24, 24, 12, 0xFF242333, 0x605D586F);
-        context.drawCenteredTextWithShadow(client.textRenderer, Text.literal("♫"),
-                x + 20, iconY + 8, accent);
+        UiDraw.roundedFill(context, x + 6, iconY - 1, 28, 26, 13, 0x52000000);
+        UiDraw.roundedPanel(context, x + 8, iconY, 24, 24, 9, 0xFF242333, 0x806C657D);
+        drawBrandMark(context, x + 8, iconY, accent);
+        UiDraw.roundedFill(context, x + 39, iconY + 4, 1, 16, 1, 0x665D586F);
 
         int visualizerX = x + width - 34;
-        int textX = x + 40;
+        int textX = x + 47;
         int textWidth = Math.max(40, visualizerX - textX - 8);
         String title = hasTrack ? track.title()
                 : SpotifyService.isConnected() ? "Spotify connected" : "Connect Spotify in PLUGS";
@@ -165,6 +166,18 @@ public final class GenHud {
             UiDraw.roundedFill(context, progressX, progressY,
                     Math.max(1, (int) (progressWidth * progress)), 1, 1, accent);
         }
+    }
+
+    /**
+     * Small geometric GEN CLIENT monogram. The rounded strokes stay crisp at HUD scale
+     * and inherit the selected Island accent without relying on the Minecraft pixel font.
+     */
+    private static void drawBrandMark(DrawContext context, int x, int y, int color) {
+        UiDraw.roundedFill(context, x + 6, y + 4, 12, 3, 1, color);
+        UiDraw.roundedFill(context, x + 4, y + 6, 3, 12, 1, color);
+        UiDraw.roundedFill(context, x + 6, y + 15, 12, 3, 1, color);
+        UiDraw.roundedFill(context, x + 15, y + 10, 3, 8, 1, color);
+        UiDraw.roundedFill(context, x + 10, y + 10, 8, 3, 1, color);
     }
 
     /** Long labels scroll inside the capsule using the selected smooth TTF font. */

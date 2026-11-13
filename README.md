@@ -20,7 +20,7 @@ Client-side mod do Minecraft Java **1.21.1** na **Fabric**, rozwijający własny
 - Tytuł utworu, wykonawca i pasek postępu z oficjalnej integracji Spotify.
 - Pięcioelementowy, płynnie animowany albo statyczny wizualizer.
 - Własna typografia Poppins (TTF) dla tekstu wyspy i Target ESP; domyślna czcionka Minecrafta pozostaje bez zmian w pozostałych ekranach.
-- Ikona muzyczna jest tymczasowym znakiem zastępczym; pobieranie i renderowanie okładki albumu nie jest jeszcze zaimplementowane.
+- Kapsuła używa własnego, geometrycznego monogramu GEN CLIENT zamiast ogólnego znaku nuty; okładka Spotify nie jest pobierana ani renderowana.
 - Opcjonalna własna linijka tekstu jest renderowana pod tytułem i wykonawcą; to tekst wpisany przez użytkownika, nie zsynchronizowane lyrics.
 
 **Lyrics:** GEN CLIENT nie pobiera ani nie synchronizuje tekstów piosenek. Własna linijka w Island Text jest niezależna od utworu i nie udaje synchronizacji. Okładki Spotify nie są pobierane ani przechowywane lokalnie.

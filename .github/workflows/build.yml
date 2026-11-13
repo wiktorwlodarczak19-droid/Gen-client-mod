@@ -1,7 +1,7 @@
 name: Build GEN CLIENT
 on:
   push:
-    branches: ["main", "feature/gen-client-0.3.0", "feature/gen-client-polish-2026-11-07", "feature/dynamic-island-layout-2026-11-11", "feature/dynamic-island-typography-2026-11-11"]
+    branches: ["main", "feature/gen-client-0.3.0", "feature/gen-client-polish-2026-11-07", "feature/dynamic-island-layout-2026-11-11", "feature/dynamic-island-typography-2026-11-11", "feature/dynamic-island-brand-mark-2026-11-13"]
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,7 @@ jobs:
           set -euo pipefail
           test -f src/main/java/pl/genclient/client/GenClient.java
           test -f src/main/java/pl/genclient/client/GenHud.java
+          grep -Fq "drawBrandMark(context" src/main/java/pl/genclient/client/GenHud.java
           test -f src/main/java/pl/genclient/client/VisualEffects.java
           test -f src/main/java/pl/genclient/client/SpotifyService.java
           test -f src/main/java/pl/genclient/config/ClientConfig.java
