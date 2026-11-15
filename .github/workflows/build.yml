@@ -1,7 +1,9 @@
 name: Build GEN CLIENT
 on:
   push:
-    branches: ["main", "feature/gen-client-0.3.0", "feature/gen-client-polish-2026-11-07", "feature/dynamic-island-layout-2026-11-11", "feature/dynamic-island-typography-2026-11-11", "feature/dynamic-island-brand-mark-2026-11-13"]
+    branches:
+      - main
+      - "feature/**"
   workflow_dispatch:
 
 permissions:
@@ -38,6 +40,9 @@ jobs:
           test -f src/main/java/pl/genclient/gui/GenHubScreen.java
           test -f src/main/java/pl/genclient/gui/SpotifyScreen.java
           test -f src/main/java/pl/genclient/gui/StyleScreen.java
+          grep -Fq "ClientConfig.cycleIslandAccent()" src/main/java/pl/genclient/gui/StyleScreen.java
+          grep -Fq "ISLAND ACCENT" src/main/java/pl/genclient/gui/StyleScreen.java
+          grep -Fq "public static void cycleIslandAccent()" src/main/java/pl/genclient/config/ClientConfig.java
           test -f src/main/resources/fabric.mod.json
           test -f src/main/resources/genclient.mixins.json
           test -f src/main/java/pl/genclient/mixin/ClientWorldMixin.java

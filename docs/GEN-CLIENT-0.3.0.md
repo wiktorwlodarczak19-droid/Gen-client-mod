@@ -44,3 +44,10 @@ FPS readouts must remain measurements from the Minecraft client. Performance fea
 - Replaced the generic music-note placeholder with a compact geometric GEN CLIENT monogram drawn from rounded HUD primitives.
 - The mark follows the Dynamic Island accent colour and is separated from track metadata by a subtle vertical divider.
 - No Spotify artwork is fetched, cached, or altered; the brand mark is local client artwork.
+
+
+## Dynamic Island accent control
+- Style → ISLAND ACCENT exposes the existing saved Dynamic Island palette cycle: GLOBAL, SAKURA, PEARL, ICE, LAVENDER and MINT.
+- The selected accent is persisted in `config/genclient.json` and applies to the island outline, progress bar and visualizer without changing the global client accent.
+- The Style panel now allocates enough vertical space for the additional row on standard and smaller GUI heights.
+- CI checks that the Style screen exposes the setting and calls the existing configuration cycle method.

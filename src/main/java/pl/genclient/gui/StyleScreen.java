@@ -23,14 +23,13 @@ public final class StyleScreen extends GenScreen {
     @Override
     protected void init() {
         panelWidth = Math.min(560, width - 40);
-        panelHeight = Math.min(360, height - 96);
-        panelHeight = Math.max(220, panelHeight);
+        panelHeight = Math.min(400, Math.max(256, height - 64));
         panelX = (width - panelWidth) / 2;
-        panelY = Math.max(58, (height - panelHeight) / 2);
+        panelY = Math.max(28, (height - panelHeight) / 2);
         buttonX = panelX + 34;
         buttonWidth = panelWidth - 68;
         firstY = panelY + Math.max(78, Math.min(92, panelHeight / 4));
-        rowGap = Math.max(22, Math.min(39, (panelHeight - 162) / 4));
+        rowGap = Math.max(22, Math.min(38, (panelHeight - 146) / 5));
 
         addDrawableChild(new GenButton(buttonX, firstY, buttonWidth, 26, accentLabel(), () -> {
             ClientConfig.cycleAccent();
@@ -53,6 +52,11 @@ public final class StyleScreen extends GenScreen {
             refreshMessages();
         }));
         addDrawableChild(new GenButton(buttonX, firstY + rowGap * 4, buttonWidth, 24,
+                islandAccentLabel(), () -> {
+            ClientConfig.cycleIslandAccent();
+            refreshMessages();
+        }));
+        addDrawableChild(new GenButton(buttonX, firstY + rowGap * 5, buttonWidth, 24,
                 toggleLabel("COMPANION MOD BADGES", ClientConfig.modBadges), () -> {
             ClientConfig.modBadges = !ClientConfig.modBadges;
             ClientConfig.save();
@@ -81,7 +85,8 @@ public final class StyleScreen extends GenScreen {
         context.drawText(textRenderer, "WALLPAPER", panelX + 34, firstY + rowGap - 14, 0xFF8F98A8, false);
         context.drawText(textRenderer, "ATMOSPHERE", panelX + 34, firstY + rowGap * 2 - 14, 0xFF8F98A8, false);
         context.drawText(textRenderer, "HUD", panelX + 34, firstY + rowGap * 3 - 14, 0xFF8F98A8, false);
-        context.drawText(textRenderer, "INTEGRATION", panelX + 34, firstY + rowGap * 4 - 14, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "ISLAND ACCENT", panelX + 34, firstY + rowGap * 4 - 14, 0xFF8F98A8, false);
+        context.drawText(textRenderer, "INTEGRATION", panelX + 34, firstY + rowGap * 5 - 14, 0xFF8F98A8, false);
         context.drawText(textRenderer, textRenderer.trimToWidth(configMessage, panelWidth - 68),
                 panelX + 34, panelY + panelHeight - 14, 0xFF858D9B, false);
     }
@@ -95,7 +100,8 @@ public final class StyleScreen extends GenScreen {
                     case 1 -> button.setMessage(wallpaperLabel());
                     case 2 -> button.setMessage(toggleLabel("FALLING SAKURA", ClientConfig.sakuraPetals));
                     case 3 -> button.setMessage(toggleLabel("DYNAMIC ISLAND HUD", ClientConfig.dynamicIsland));
-                    case 4 -> button.setMessage(toggleLabel("COMPANION MOD BADGES", ClientConfig.modBadges));
+                    case 4 -> button.setMessage(islandAccentLabel());
+                    case 5 -> button.setMessage(toggleLabel("COMPANION MOD BADGES", ClientConfig.modBadges));
                     default -> { }
                 }
                 index++;
@@ -104,6 +110,9 @@ public final class StyleScreen extends GenScreen {
     }
 
     private static Text accentLabel() { return Text.literal("ACCENT  /  " + ClientConfig.accent); }
+    private static Text islandAccentLabel() {
+        return Text.literal("ISLAND ACCENT  /  " + ClientConfig.islandAccent);
+    }
     private static Text wallpaperLabel() {
         return Text.literal("WALLPAPER  /  " + ClientConfig.wallpaper.replace('_', ' ').toUpperCase());
     }
