@@ -38,6 +38,22 @@ jobs:
           test -f src/main/java/pl/genclient/gui/GenPauseMenuScreen.java
           test -f src/main/java/pl/genclient/gui/VisualsScreen.java
           test -f src/main/java/pl/genclient/gui/GenHubScreen.java
+          test -f src/main/java/pl/genclient/gui/ModuleIconRenderer.java
+          grep -Fq "ModuleIconRenderer.draw(context, module" src/main/java/pl/genclient/gui/GenHubScreen.java
+          python3 - <<'PY'
+          from pathlib import Path
+
+          source = Path("src/main/java/pl/genclient/gui/ModuleIconRenderer.java").read_text()
+          modules = (
+              "Jump Circle", "Glass Vapor", "Target ESP", "Kill Effect", "Hit Sparks",
+              "Custom Sky", "Glint Hand", "Aura Glint Light 3D", "Armor Glass Light 3D",
+              "Dynamic Island", "FPS Counter", "Low FX Mode", "Sky Petals",
+              "Spotify Player", "Island Text", "Companion Badges",
+          )
+          missing = [name for name in modules if f'case "{name}" ->' not in source]
+          assert not missing, f"Missing custom module icons: {missing}"
+          print(f"Verified {len(modules)} named GEN CLIENT module icons.")
+          PY
           test -f src/main/java/pl/genclient/gui/SpotifyScreen.java
           test -f src/main/java/pl/genclient/gui/StyleScreen.java
           grep -Fq "ClientConfig.cycleIslandAccent()" src/main/java/pl/genclient/gui/StyleScreen.java
@@ -104,6 +120,7 @@ jobs:
             pl/genclient/config/ClientConfig.class \
             pl/genclient/gui/GenButton.class \
             pl/genclient/gui/GenHubScreen.class \
+            pl/genclient/gui/ModuleIconRenderer.class \
             pl/genclient/gui/SpotifyScreen.class \
             pl/genclient/gui/GenMainMenuScreen.class \
             pl/genclient/gui/GenPauseMenuScreen.class \

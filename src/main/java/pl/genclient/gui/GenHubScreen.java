@@ -287,11 +287,8 @@ public final class GenHubScreen extends GenScreen {
             UiDraw.roundedFill(context, x + 1, y + 7, 2, 28, 1, ClientConfig.accentColor());
             UiDraw.roundedPanel(context, x + 9, y + 9, 24, 24, 7,
                     0xD91A1D29, 0x805B606D);
-            String glyph = module.equals("FPS Counter") ? "F"
-                    : module.equals("Spotify Player") ? "♪"
-                    : module.substring(0, 1);
-            context.drawCenteredTextWithShadow(textRenderer, glyph, x + 21, y + 17,
-                    ClientConfig.accentColor());
+            ModuleIconRenderer.draw(context, module, x + 9, y + 9,
+                    ClientConfig.accentColor(), enabled(module));
             int labelWidth = Math.max(32, cardWidth - 150);
             context.drawTextWithShadow(textRenderer,
                     textRenderer.trimToWidth(module, labelWidth),

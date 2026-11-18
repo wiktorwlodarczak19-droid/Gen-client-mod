@@ -12,6 +12,7 @@ Client-side mod do Minecraft Java **1.21.1** na **Fabric**, rozwijający własny
 - **Prawy Shift** — otwiera lub zamyka GEN CLIENT Control Center.
 - Zakładki: **Mods**, **Visual**, **GenLand**, **Addons**, **Plugs**.
 - Moduły mają własne przełączniki ON/OFF i osobne ustawienia pod zębatką.
+- Karty modułów mają indywidualne, rysowane z zaokrąglonych prymitywów ikony; nie korzystają z przypadkowych pierwszych liter ani zewnętrznego fontu ikon.
 - Konfiguracja jest przechowywana w `config/genclient.json`.
 
 ## Dynamic Island
